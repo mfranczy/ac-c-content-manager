@@ -1,0 +1,29 @@
+<SkinsView>:
+    rows: 2
+    GridLayout:
+        id: header
+        cols: 1
+        rows: 1
+        orientation: 'tb-rl'
+        canvas:
+            Color:
+                rgba: 1, 1, 1, .6
+            Rectangle:
+                size: 1024, 50
+                pos: 0, 550
+        size_hint: 1, None
+        height: '45'
+        padding: 10
+        Button:
+            id: download_all
+            size: 150, 30
+            size_hint: None, None
+            text: 'Download all'
+    ScrollView:
+        size: self.size
+        GridLayout:
+            id: content
+            cols: 1
+            orientation: 'tb-lr'
+            padding: 20
+            size_hint_y: None

@@ -11,6 +11,10 @@ class FTPClient(NetworkClient):
         super(FTPClient, self).__init__()
         self.endpoint = endpoint
 
+    def ping(self):
+        with FTP(self.endpoint.hostname) as ftp:
+            ftp.login()
+
     def list_files(self):
         try:
             with FTP(self.endpoint.hostname) as ftp:

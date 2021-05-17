@@ -26,3 +26,6 @@ class Client:
 
     def list_local_files(self):
         self.__local.list_files()
+    
+    def ping(self):
+        self.__net.ping()

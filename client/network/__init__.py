@@ -12,9 +12,13 @@ class NetworkClient(ABC):
         self.pool = ThreadPool()
 
     @abstractmethod
-    async def list_files(self):
+    def list_files(self):
         pass
 
     @abstractmethod
-    async def download_file(self, file, dest, callback):
+    def download_file(self, file, dest, callback):
+        pass
+    
+    @abstractmethod
+    def ping(self):
         pass

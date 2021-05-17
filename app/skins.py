@@ -3,8 +3,16 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.progressbar import ProgressBar
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.uix.screenmanager import Screen
 
 from api.skins import Skins
+
+
+class SkinsScreen(Screen):
+
+    def __init__(self, config, **kwargs):
+        super(SkinsScreen, self).__init__(**kwargs)
+        self.add_widget(SkinsView(config), 0, None)
 
 
 class SkinWidget(GridLayout):
@@ -61,7 +69,7 @@ class SkinsView(GridLayout):
             widget = SkinWidget(obj)
             self.skin_widgets.append(widget)
             content.add_widget(widget)
-    
+
     def click(self, instance):
         for skin in self.skin_widgets:
             skin.download_btn.trigger_action()

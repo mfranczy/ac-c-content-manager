@@ -1,0 +1,108 @@
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+
+<LoaderScreen>:
+	name: "loader"
+    MDBoxLayout:
+    	md_bg_color: get_color_from_hex("#222222")
+    	MDLabel:
+    		id: loader_label
+    		text: "Loading..."
+    		halign: "center"
+    		theme_text_color: "Custom"
+		    text_color: get_color_from_hex("#ffffff")
+
+<ContentScreen>:
+	name: "loader"
+    MDBoxLayout:
+    	md_bg_color: get_color_from_hex("#222222")
+    	orientation: "vertical"
+	
+	    MDToolbar:
+	        title: "Content Manager"
+	        md_bg_color: get_color_from_hex("#333333")
+	        icon: "git"
+	        right_action_items: [["menu", lambda x: x]]
+	        on_action_button: app.callback(self.icon)
+	
+	    MDBoxLayout:
+			MDNavigationRail:
+	    		id: rail
+	            md_bg_color: get_color_from_hex("#333333")
+	            color_normal: get_color_from_hex("#718089")
+	            color_active: get_color_from_hex("#f3ab44")
+	
+	            MDNavigationRailItem:
+	            	icon: "car-hatchback"
+	            	text: "AC"
+	            	on_release:
+	                	content_manager.current = 'ac'
+	                	content_manager.transition.direction = "right"
+	
+	            MDNavigationRailItem:
+	                icon: "car-hatchback"
+	                text: "ACC"
+	                on_release:
+	                	content_manager.current = 'acc'
+	                	content_manager.transition.direction = "left"
+
+			ScreenManager:
+				id: content_manager
+				MDScreen:
+					id: ac_screen
+					name: 'ac'
+					MDBoxLayout:
+						padding: "24dp"
+						ScrollView:
+							MDList:
+								id: ac_skins
+								spacing: "12dp"
+								cols: 1
+
+				MDScreen:
+					id: acc_screen
+					name: 'acc'
+					MDBoxLayout:
+						padding: "24dp"
+						ScrollView:
+							MDList:
+								id: acc_skins
+								spacing: "12dp"
+								cols: 1
+
+<SkinWidget>:
+	md_bg_color: get_color_from_hex("#333333")
+	padding: "10dp"
+	spacing: ["10dp", 0]
+	cols: 4
+    orientation: "tb-lr"
+    size_hint_y: None
+    height: 50
+
+	DescriptionLabelWidget:
+		size_hint_x: 0.25
+		id: "desc_text"
+        text: ""
+        valign: "center"
+        color: get_color_from_hex("#718089")
+
+    PercentageLabelWidget:
+    	size_hint_x: 0.05
+    	id: "percentage_text"
+        text: "0%"
+        halign: "center"
+        valign: "center"
+        color: get_color_from_hex("#718089")
+
+    ProgressBarWidget:
+    	size_hint_x: 0.2
+    	id: "progress_bar"
+    	padding: "10dp"
+        value: 0
+        color: get_color_from_hex("#ff8000")
+
+	DownloadWidget:
+		size_hint_x: 0.1
+		id: "download_button"
+	    text: "Download"
+	    text_color: get_color_from_hex("#718089")
+	    line_color: get_color_from_hex("#ff8000")

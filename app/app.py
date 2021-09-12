@@ -24,4 +24,5 @@ class App(MDApp):
     
     def build(self):
         self.title = "simrace.pl - build v0.0.1-alpha"
+        self.icon = "icon.ico"
         return MainScreen()

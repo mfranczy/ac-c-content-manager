@@ -36,6 +36,7 @@ class MainScreen(ScreenManager):
 class LoaderScreen(MDScreen):
 
     def __init__(self, *args, **kwargs):
+        self.transition = FadeTransition()
         super(LoaderScreen, self).__init__(*args, **kwargs)
         self.loader_label = self.ids.loader_label
 
@@ -80,7 +81,11 @@ class ContentScreen(MDScreen):
     def initialize_ac_skins(self):
         skins = self.manager.ftp.list_skins("ac")
         for skin in skins:
+            # TODO: fix duplicated skins from different ids
             self.ids.ac_skins.add_widget(SkinWidget(remote_skin_path=skin[0], remote_timestamp=skin[1], skin_type="ac"))
 
     def initialize_acc_skins(self):
-        pass
+        skins = self.manager.ftp.list_skins("acc")
+        for skin in skins:
+            # TODO: fix duplicated skins from different ids
+            self.ids.acc_skins.add_widget(SkinWidget(remote_skin_path=skin[0], remote_timestamp=skin[1], skin_type="acc"))

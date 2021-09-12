@@ -95,14 +95,16 @@ class SkinWidget(MDGridLayout):
         self.remote_timestamp = remote_timestamp
         self.remote_skin_path = remote_skin_path
         super(SkinWidget, self).__init__()
+
+        self.skin_type = skin_type
         self.pool = ThreadPool()
-        
+
         app = MDApp.get_running_app()
         self.config = app.config
         self.dispatcher = app.custom_dispatcher
 
         self.ftp = FTPClient()
-        self.local_file = LocalFileClient(remote_skin_path, self.config.get(skin_type, "cars_dir"))
+        self.local_file = LocalFileClient(remote_skin_path, self.config.get(skin_type, "cars_dir"), skin_type)
 
         self.set_attr()
         self.register_events()
@@ -112,8 +114,12 @@ class SkinWidget(MDGridLayout):
 
     @property
     def name(self):
-        s = self.remote_skin_path.split("/")
-        return "{}/{}".format(s[2], s[3])
+        if self.skin_type == "ac":
+            s = self.remote_skin_path.split("/")
+            return "{}/{}".format(s[2], s[3])
+        elif self.skin_type == "acc":
+            return self.remote_skin_path.split("/")[2]
+        raise Exception("Unkown skin type: {}".format(self.skin_type))
 
     def set_description(self, dt):
         self.desc_label.text = self.name
@@ -240,6 +246,7 @@ class SkinWidget(MDGridLayout):
     def update_progress_bar(self, percent, dt):
         self.progressbar.value = percent
         self.percentage_label.text = "{}%".format(percent)
+
 
 class DescriptionLabelWidget(MDLabel):
 

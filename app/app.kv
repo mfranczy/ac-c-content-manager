@@ -21,9 +21,12 @@
 	        title: "Content Manager"
 	        md_bg_color: get_color_from_hex("#333333")
 	        icon: "git"
-	        right_action_items: [["menu", lambda x: root.menu.open_callback(x)]]
-	        
-	
+	        left_action_items: [["menu", lambda x: root.menu.open_callback(x)]]
+
+			Image:
+				source: "logo.png"
+	            pos: (360, 0)
+
 	    MDBoxLayout:
 			MDNavigationRail:
 	    		id: rail
@@ -47,6 +50,7 @@
 
 			ScreenManager:
 				id: content_manager
+
 				MDScreen:
 					id: ac_screen
 					name: 'ac'
@@ -101,7 +105,7 @@
         color: get_color_from_hex("#ff8000")
 
 	DownloadWidget:
-		size_hint_x: 0.1
+		size_hint: None, None
 		id: "download_button"
 	    text: "Download"
 	    text_color: get_color_from_hex("#718089")

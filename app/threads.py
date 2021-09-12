@@ -35,5 +35,5 @@ class ThreadPool(metaclass=Singleton):
                 item()
                 q.task_done()
             except Exception as exc:
-                # TODO: change to better error handling
-                print(exc)
+                # TODO: add better error handling
+                pass

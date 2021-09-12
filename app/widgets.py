@@ -1,4 +1,6 @@
-from kivy.clock import mainthread
+from functools import partial
+
+from kivy.clock import mainthread, Clock
 from kivymd.app import MDApp
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.button import MDRectangleFlatButton
@@ -10,6 +12,7 @@ from kivy.metrics import dp
 from kivymd.uix.menu import MDDropdownMenu
 
 from .clients import FTPClient, LocalFileClient
+from app.threads import ThreadPool
 
 
 class MenuWidget(MDDropdownMenu):
@@ -46,7 +49,7 @@ class MenuWidget(MDDropdownMenu):
             },
             {
                "viewclass": "OneLineListItem",
-               "text": "Config",
+               "text": "Settings",
                "height": dp(56),
                "on_release": self.config,
             }
@@ -92,6 +95,7 @@ class SkinWidget(MDGridLayout):
         self.remote_timestamp = remote_timestamp
         self.remote_skin_path = remote_skin_path
         super(SkinWidget, self).__init__()
+        self.pool = ThreadPool()
         
         app = MDApp.get_running_app()
         self.config = app.config
@@ -102,8 +106,8 @@ class SkinWidget(MDGridLayout):
 
         self.set_attr()
         self.register_events()
-        self.set_description()
-        self.refresh_state()
+        Clock.schedule_once(self.set_description)
+        Clock.schedule_once(self.refresh_state)
         self.download_in_progress = False
 
     @property
@@ -111,11 +115,11 @@ class SkinWidget(MDGridLayout):
         s = self.remote_skin_path.split("/")
         return "{}/{}".format(s[2], s[3])
 
-    def set_description(self):
+    def set_description(self, dt):
         self.desc_label.text = self.name
 
     @mainthread
-    def refresh_state(self):
+    def refresh_state(self, dt):
         recreate_color = get_color_from_hex("#00cc00")
         download_color = get_color_from_hex("#ff8000")
         update_color = get_color_from_hex("#03fcf8")
@@ -182,31 +186,60 @@ class SkinWidget(MDGridLayout):
         self.download_in_progress = True
 
         self.temp_size = 0
+        Clock.schedule_once(self.set_pre_download_btn_ui)
+
+        def _download():            
+            try:
+                Clock.schedule_once(self.set_download_btn_ui)
+                temp_file = self.local_file.create_temp()
+                self.ftp.download_file(self.remote_skin_path, temp_file, self.download_progress)
+                Clock.schedule_once(self.set_extract_btn_ui)
+                self.local_file.extract_temp()
+            except Exception as exc:
+                Clock.schedule_once(partial(self.report_error, exc))
+            finally:
+                Clock.schedule_once(self.refresh_state)
+                self.download_in_progress = False
+
+        self.pool.submit(_download)
+
+    def report_error(self, exc, dt):
+        Snackbar(
+            text="[color=#f2776d]ERROR: {}[/color]".format(exc),
+            size_hint_x=.7,
+            snackbar_y="30dp",
+            snackbar_x="30dp",
+            bg_color=get_color_from_hex("#544746")
+        ).open()
+
+    def download_progress(self, max_size, fd, data):
+        fd.write(data)
+        self.temp_size += len(data)
+        percent = int(self.temp_size * 100 / max_size)
+        Clock.schedule_once(partial(self.update_progress_bar, percent))
+        
+    @mainthread
+    def set_pre_download_btn_ui(self, dt):
         self.progressbar.value = 0
         self.percentage_label.text = "0%"
         self.download_button.disabled = True
-        self.download_button.md_bg_color_disabled = get_color_from_hex("#ffd970")
+        self.download_button.md_bg_color_disabled = get_color_from_hex("#cd8dd8")
+        self.download_button.text = "Waiting"
+
+    @mainthread
+    def set_download_btn_ui(self, dt):
         self.download_button.text = "Downloading"
-        temp_file = self.local_file.create_temp()
-        self.ftp.download_file(self.remote_skin_path, temp_file, self.download_progress, self.download_done)
+        self.download_button.md_bg_color_disabled = get_color_from_hex("#dad239")
 
-    def download_progress(self, max_size, fd, data):
-        try:
-            fd.write(data)
-            self.temp_size += len(data)
-            percent = int(self.temp_size * 100 / max_size)
-            self.progressbar.value = percent
-            self.percentage_label.text = "{}%".format(percent)
-            if percent >= 100:
-                self.local_file.extract_temp()
-        except Exception as exc:
-            print(exc)
-            self.refresh_state()
+    @mainthread    
+    def set_extract_btn_ui(self, dt):
+        self.download_button.text = "Extracting"
+        self.download_button.md_bg_color_disabled = get_color_from_hex("#54f0af")
 
-    def download_done(self):
-        self.download_in_progress = False
-        self.refresh_state()
-
+    @mainthread
+    def update_progress_bar(self, percent, dt):
+        self.progressbar.value = percent
+        self.percentage_label.text = "{}%".format(percent)
 
 class DescriptionLabelWidget(MDLabel):
 

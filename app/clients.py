@@ -11,8 +11,6 @@ from functools import partial
 
 from kivymd.app import MDApp
 
-from .threads import ThreadPool
-
 
 class FTPClient:
 
@@ -22,7 +20,6 @@ class FTPClient:
         self.user = config.get('generic', 'user')
         self.server = config.get('generic', 'server')
         self.scheme = urlparse(self.server)
-        self.pool = ThreadPool()
 
     def ping(self):
         with FTP(self.scheme.hostname) as ftp:
@@ -54,20 +51,12 @@ class FTPClient:
                 raise Exception("Invalid base path")
             return result
 
-    def download_file(self, file_path, file, progress_callback, done_callback):
-
-        def _download():
-            with file as fd:
-                with FTP(self.scheme.hostname) as ftp:
-                    try:
-                        ftp.login(user=self.user)
-                        size = ftp.size(file_path)
-                        ftp.retrbinary("RETR " + file_path, partial(progress_callback, size, fd))
-                    except Exception as exc:
-                        # TODO: change to thread exit
-                        print(exc)
-
-        self.pool.submit(_download)
+    def download_file(self, file_path, file, progress_callback):
+        with file as fd:
+            with FTP(self.scheme.hostname) as ftp:
+                ftp.login(user=self.user)
+                size = ftp.size(file_path)
+                ftp.retrbinary("RETR " + file_path, partial(progress_callback, size, fd))
 
 
 class LocalFileClient:
@@ -118,5 +107,6 @@ class LocalFileClient:
             os.utime(self.skin_path, (mod_time, mod_time))
         except Exception as exc:
             shutil.rmtree(self.skin_path)
+            raise exc
         finally:
             self.delete_temp()

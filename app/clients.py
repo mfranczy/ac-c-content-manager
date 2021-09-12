@@ -54,7 +54,7 @@ class FTPClient:
                 raise Exception("Invalid base path")
             return result
 
-    def download_file(self, file_path, file, callback):
+    def download_file(self, file_path, file, progress_callback, done_callback):
 
         def _download():
             with file as fd:
@@ -62,7 +62,7 @@ class FTPClient:
                     try:
                         ftp.login(user=self.user)
                         size = ftp.size(file_path)
-                        ftp.retrbinary("RETR " + file_path, partial(callback, size, fd))
+                        ftp.retrbinary("RETR " + file_path, partial(progress_callback, size, fd))
                     except Exception as exc:
                         # TODO: change to thread exit
                         print(exc)

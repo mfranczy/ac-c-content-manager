@@ -3,7 +3,7 @@ from kivymd.app import MDApp
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 
-from .widgets import SkinWidget
+from .widgets import MenuWidget, SkinWidget
 from .clients import FTPClient
 
 
@@ -14,29 +14,39 @@ class MainScreen(ScreenManager):
         self.ftp = FTPClient()
         super(MainScreen, self).__init__(*args, **kwargs)
         self.transition = FadeTransition()
+
         self._register_screens()
+        self.app.custom_dispatcher.bind(on_refresh=self.on_refresh)
+
+    def on_refresh(self, *args):
+        self.content.ids['ac_skins'].clear_widgets()
+        self.content.ids['acc_skins'].clear_widgets()
+        self.loader.switch_screen()
 
     def _register_screens(self):
-        loader = LoaderScreen(name='loader')
-        content = ContentScreen(name='content')
+        self.loader = LoaderScreen(name='loader')
+        self.content = ContentScreen(name='content')
 
-        self.app.custom_dispatcher.bind(on_initialize=content.on_initialize)
+        self.app.custom_dispatcher.bind(on_initialize=self.content.on_initialize)
 
-        self.add_widget(loader)
-        self.add_widget(content)
+        self.add_widget(self.loader)
+        self.add_widget(self.content)
 
 
 class LoaderScreen(MDScreen):
-    
+
     def __init__(self, *args, **kwargs):
         super(LoaderScreen, self).__init__(*args, **kwargs)
         self.loader_label = self.ids.loader_label
 
     def on_enter(self):
         Clock.schedule_once(self.connect)
-        
+
+    def switch_screen(self):
+        self.manager.current = self.name
+
     def on_leave(self):
-        self.loader_label = "Loading..."
+        self.loader_label.text = "Loading..."
 
     def connect(self, *args):
         self.loader_label.text = "Trying to connect to: {}...".format(self.manager.ftp.server)
@@ -54,6 +64,10 @@ class LoaderScreen(MDScreen):
 
 
 class ContentScreen(MDScreen):
+    
+    def __init__(self, *args, **kwargs):
+        self.menu = MenuWidget()
+        super(ContentScreen, self).__init__(*args, **kwargs)
 
     def on_initialize(self, obj):        
         self.initialize_ac_skins()
@@ -70,5 +84,3 @@ class ContentScreen(MDScreen):
 
     def initialize_acc_skins(self):
         pass
-
-

@@ -3,7 +3,6 @@ Config.set('graphics', 'width', '1024')
 Config.set('graphics', 'height', '768')
 
 from kivymd.app import MDApp
-
 from .screens import MainScreen
 from .dispatcher import CustomDispatcher
 
@@ -24,4 +23,5 @@ class App(MDApp):
         settings.add_json_panel('Content server settings', self.config, 'app/settings/settings.json')
     
     def build(self):
+        self.title = "simrace.pl - build v0.0.1-alpha"
         return MainScreen()

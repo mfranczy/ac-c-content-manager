@@ -21,8 +21,8 @@
 	        title: "Content Manager"
 	        md_bg_color: get_color_from_hex("#333333")
 	        icon: "git"
-	        right_action_items: [["menu", lambda x: x]]
-	        on_action_button: app.callback(self.icon)
+	        right_action_items: [["menu", lambda x: root.menu.open_callback(x)]]
+	        
 	
 	    MDBoxLayout:
 			MDNavigationRail:

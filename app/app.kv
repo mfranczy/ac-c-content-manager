@@ -1,5 +1,61 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 
+
+<SettingsScreen>:
+	name: "settings"
+    MDBoxLayout:
+    	orientation: "vertical"
+    	md_bg_color: get_color_from_hex("#ffffff")
+    	padding: ("300dp", "100dp")
+    	spacing: "50dp"
+
+    	MDLabel:
+    		halign: "center"
+    		id: settings_label
+    		text: "Settings"
+    		theme_text_color: "Custom"
+		    text_color: get_color_from_hex("#333333")
+		    height: "30dp"
+
+		MDTextField:
+			id: generic_user
+		    hint_text: "FTP user"
+		    required: True
+		    helper_text: "Created FTP user to login to the FTP server"
+		    helper_text_mode: "on_focus"
+
+		MDTextField:
+			id: generic_server
+		    hint_text: "FTP server address"
+		    required: True
+		    helper_text: "FTP server address to connect to"
+		    helper_text_mode: "on_focus"
+
+		MDTextField:
+			id: ac_skins_dir
+		    hint_text: "Assetto Corsa skins directory"
+		    helper_text: "Leaving that field empty means ACC is not installed"
+		    helper_text_mode: "on_focus"
+
+		MDTextField:
+			id: acc_skins_dir
+		    hint_text: "Assetto Corsa Competizione skins directory"
+		    helper_text: "Leaving that field empty means ACC is not installed"
+		    helper_text_mode: "on_focus"
+
+		MDBoxLayout:
+			spacing: "250dp"
+			MDRectangleFlatButton:
+			    text: "Cancel"
+			    text_color: get_color_from_hex("333333")
+			    line_color: get_color_from_hex("333333")
+			    on_release: app.close_settings()
+			MDRectangleFlatButton:
+			    text: "Confirm"
+			    text_color: get_color_from_hex("333333")
+			    line_color: get_color_from_hex("333333")
+			    on_release: root.confirm()
+
 <LoaderScreen>:
 	name: "loader"
     MDBoxLayout:

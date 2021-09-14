@@ -18,10 +18,12 @@ from app.threads import ThreadPool
 class MenuWidget(MDDropdownMenu):
     
     def __init__(self, *args, **kwargs):
+        self.app = MDApp.get_running_app()
+        self.dispatcher = self.app.custom_dispatcher
         self.width_mult = 4
         self.items = self.menu_items()
         super(MenuWidget, self).__init__(*args, **kwargs)
-        self.dispatcher = MDApp.get_running_app().custom_dispatcher
+        
 
     def open_callback(self, button):
         self.caller = button
@@ -51,7 +53,7 @@ class MenuWidget(MDDropdownMenu):
                "viewclass": "OneLineListItem",
                "text": "Settings",
                "height": dp(56),
-               "on_release": self.config,
+               "on_release": self.app.open_settings,
             }
         ]
 
@@ -77,10 +79,6 @@ class MenuWidget(MDDropdownMenu):
     def download_all(self):
         self.dispatcher.do_download_all()
 
-    @_menu_item
-    def config(self):
-        pass
-
 
 class SkinWidget(MDGridLayout):
     
@@ -104,7 +102,7 @@ class SkinWidget(MDGridLayout):
         self.dispatcher = app.custom_dispatcher
 
         self.ftp = FTPClient()
-        self.local_file = LocalFileClient(remote_skin_path, self.config.get(skin_type, "cars_dir"), skin_type)
+        self.local_file = LocalFileClient(remote_skin_path, self.config.get(skin_type, "skins_dir"), skin_type)
 
         self.set_attr()
         self.register_events()

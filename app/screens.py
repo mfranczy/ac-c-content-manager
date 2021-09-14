@@ -21,7 +21,10 @@ class MainScreen(ScreenManager):
     def on_refresh(self, *args):
         self.content.ids['ac_skins'].clear_widgets()
         self.content.ids['acc_skins'].clear_widgets()
-        self.loader.switch_screen()
+        self.remove_widget(self.loader)
+        self.remove_widget(self.content)
+        self.add_widget(self.loader)
+        self.add_widget(self.content)
 
     def _register_screens(self):
         self.loader = LoaderScreen(name='loader')
@@ -32,16 +35,14 @@ class MainScreen(ScreenManager):
         self.add_widget(self.loader)
         self.add_widget(self.content)
 
-
 class LoaderScreen(MDScreen):
 
     def __init__(self, *args, **kwargs):
-        self.transition = FadeTransition()
         super(LoaderScreen, self).__init__(*args, **kwargs)
         self.loader_label = self.ids.loader_label
 
     def on_enter(self):
-        Clock.schedule_once(self.connect)
+        Clock.schedule_once(self.load)
 
     def switch_screen(self):
         self.manager.current = self.name
@@ -49,15 +50,15 @@ class LoaderScreen(MDScreen):
     def on_leave(self):
         self.loader_label.text = "Loading..."
 
-    def connect(self, *args):
+    def load(self, *args):
         self.loader_label.text = "Trying to connect to: {}...".format(self.manager.ftp.server)
         try:
             self.manager.ftp.ping()
         except Exception as exc:
-            self.loader_label.text = "Unable to connect to: {}...\nCheck your config and retry.\n\n{}".format(self.manager.ftp.server, exc)
+            self.loader_label.text = "Unable to connect to: {}\n{}\n\nCheck your config by pressing F1 and retry.".format(self.manager.ftp.server, exc)
         else:
             self.loader_label.text = "Successfully connected to: {}...".format(self.manager.ftp.server)
-            Clock.schedule_once(self.initialize_content, 1)
+            Clock.schedule_once(self.initialize_content)
 
     def initialize_content(self, *args):
         self.loader_label.text += "\n\nInitializing content..."
@@ -89,3 +90,39 @@ class ContentScreen(MDScreen):
         for skin in skins:
             # TODO: fix duplicated skins from different ids
             self.ids.acc_skins.add_widget(SkinWidget(remote_skin_path=skin[0], remote_timestamp=skin[1], skin_type="acc"))
+
+
+class SettingsScreen(MDScreen):
+
+    __config__ = ('generic_user', 'generic_server', 'ac_skins_dir', 'acc_skins_dir')
+
+    def __init__(self, *args, **kwargs):
+        super(SettingsScreen, self).__init__(*args, **kwargs)
+        self.app = MDApp.get_running_app()
+        self.config = self.app.config
+        self.set_current_settings()
+
+
+    def set_current_settings(self):
+        for attr in self.__config__:
+            if not self.ids.get(attr, False):
+                continue
+            obj = self.ids[attr]
+            setattr(self, attr, obj)
+            try:
+                section, name = attr.split("_", 1)
+                obj.text = self.config.get(section, name)
+            except Exception as exc:
+                print(exc)
+
+    def confirm(self, *args, **kwargs):
+        for attr in self.__config__:
+            try:
+                obj = getattr(self, attr)
+                section, name = attr.split("_", 1)
+                self.config.set(section, name, obj.text)
+            except Exception as exc:
+                print(exc)
+        self.config.write()
+        self.app.close_settings()
+        self.app.custom_dispatcher.do_refresh()

@@ -1,28 +1,67 @@
+import winreg
+import os
+
+from pathlib import Path
+
+os.environ['KIVY_HOME'] = r'{}\Documents\Simrace Content Manager'.format(Path.home())
+
 from kivy.config import Config
 Config.set('graphics', 'width', '1024')
 Config.set('graphics', 'height', '768')
 
 from kivymd.app import MDApp
-from .screens import MainScreen
+from .screens import MainScreen, SettingsScreen
 from .dispatcher import CustomDispatcher
 
 
 class App(MDApp):
     
     def __init__(self, *args, **kwargs):
+        self.use_kivy_settings = False
         self.custom_dispatcher = CustomDispatcher()
         super(App, self).__init__(*args, **kwargs)
 
     def build_config(self, config):
-        # TODO: check multiple locations
-        # TODO: handle not found error
-        config.read('app/config.ini')
 
-    def build_settings(self, settings):
-        # TODO: validate settings
-        settings.add_json_panel('Content server settings', self.config, 'app/settings/settings.json')
-    
+        def _get_ac_dir():
+            try:
+                hkey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\WOW6432Node\Valve\Steam")
+                steam_path = winreg.QueryValueEx(hkey, "InstallPath")[0]
+                winreg.CloseKey(hkey)
+            except Exception as exc:
+                print(exc)
+                return ""
+            else:
+                if steam_path == "":
+                    return ""
+                return r'{}\steamapps\common\assettocorsa\content\cars'.format(steam_path)
+
+        def _get_acc_dir():
+            d = Path(r'{}\Documents\Assetto Corsa Competizione\Customs\Liveries'.format(Path.home()))
+            if d.exists():
+                return str(d.absolute())
+            return ""
+        
+        config.setdefaults('generic', {
+                'user': 'app',
+                'server': 'ftp://localhost'
+            }
+        )
+
+        config.setdefaults('ac', {
+                'skins_dir': _get_ac_dir() 
+            },
+        )
+
+        config.setdefaults('acc', {
+                'skins_dir': _get_acc_dir() 
+            },
+        )
+#
+    def create_settings(self):
+        return SettingsScreen()
+
     def build(self):
-        self.title = "simrace.pl - build v0.0.1-alpha"
+        self.title = "simrace.pl - build v0.1.0-alpha"
         self.icon = "icon.ico"
         return MainScreen()

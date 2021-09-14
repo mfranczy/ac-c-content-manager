@@ -16,16 +16,26 @@ class FTPClient:
 
     def __init__(self):
         super(FTPClient, self).__init__()
-        config = MDApp.get_running_app().config
-        self.user = config.get('generic', 'user')
-        self.server = config.get('generic', 'server')
+        self.config = MDApp.get_running_app().config
+        self.user = self.config.get('generic', 'user')
+        self.server = self.config.get('generic', 'server')
         self.scheme = urlparse(self.server)
 
+    def _refresh_config(func):
+        def wrapper(self, *args, **kwargs):
+            self.user = self.config.get('generic', 'user')
+            self.server = self.config.get('generic', 'server')
+            self.scheme = urlparse(self.server)
+            return func(self, *args, **kwargs)
+        return wrapper
+
+    @_refresh_config
     def ping(self):
         with FTP(self.scheme.hostname) as ftp:
             ftp.login(user=self.user)
 
     # TODO: refactor that function to share common things with ac and acc
+    @_refresh_config
     def list_skins(self, base_path):
         result = []
         with FTP(self.scheme.hostname) as ftp:
@@ -72,7 +82,7 @@ class LocalFileClient:
     def __init__(self, remote_skin_path, cars_dir, skin_type):
         # TODO: validate this, it's very optimistic
         res = remote_skin_path.split("/")
-        
+
         # TODO: refactor this to subclasses
         if skin_type == 'ac':
             self.name, self.ext = res[3].split(".")

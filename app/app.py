@@ -1,6 +1,7 @@
 import winreg
 import os
 
+from kivymd.effects.stiffscroll import StiffScrollEffect # hack for pyinstaller
 from pathlib import Path
 
 os.environ['KIVY_HOME'] = r'{}\Documents\Simrace Content Manager'.format(Path.home())
@@ -17,7 +18,6 @@ from .dispatcher import CustomDispatcher
 class App(MDApp):
     
     def __init__(self, *args, **kwargs):
-        self.use_kivy_settings = False
         self.custom_dispatcher = CustomDispatcher()
         super(App, self).__init__(*args, **kwargs)
 
@@ -57,11 +57,11 @@ class App(MDApp):
                 'skins_dir': _get_acc_dir() 
             },
         )
-#
+
     def create_settings(self):
         return SettingsScreen()
 
     def build(self):
-        self.title = "simrace.pl - build v0.1.0-alpha"
+        self.title = "simrace.pl - build v0.1.0-alpha-1"
         self.icon = "icon.ico"
         return MainScreen()

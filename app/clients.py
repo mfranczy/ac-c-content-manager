@@ -2,8 +2,8 @@ import os
 import shutil
 import time
 import tempfile
+import zipfile
 
-from pyunpack import Archive
 from pathlib import Path
 from ftplib import FTP
 from urllib.parse import urlparse
@@ -45,30 +45,48 @@ class FTPClient:
                 # TODO: better to verify if file should be refreshed over checksum than timestamp
                 # although not every FTP server supports HASH command and there is no standard for hashing
                 # result.append((skin, ftp.sendcmd("MDTM {}".format(skin))))
-                ids = ftp.nlst(base_path)
+                ids = ftp.mlsd(base_path)
                 for id_ in ids:
-                    cars = ftp.nlst(id_)
+                    if id_[1]['type'] != 'dir':
+                        continue
+                    cars = ftp.mlsd("{}/{}".format(base_path, id_[0]))
                     for car in cars:
-                        skins = ftp.nlst(car)
+                        if car[1]['type'] != 'dir':
+                            continue
+                        skins = ftp.mlsd("{}/{}/{}".format(base_path, id_[0], car[0]))
                         for skin in skins:
-                            for file in ftp.mlsd(skin):
-                                if file[1]["type"] == "file":
-                                    # TODO: set server timestamp, now there is assumption GMT+2
-                                    timestamp = time.mktime(time.strptime(file[1]['modify'], "%Y%m%d%H%M%S"))
-                                    result.append((skin,timestamp))
-            elif base_path == "acc":
-                ids = ftp.nlst(base_path)
-                for id_ in ids:
-                    for file in ftp.mlsd(id_):
-                        skin = "{}/{}".format(id_, file[0])
-                        if file[1]["type"] == "file":
+                            if skin[1]['type'] != 'file':
+                                continue
+                            r = skin[0].split('.')
+                            if len(r) != 2:
+                                continue
+                            if r[1] != 'zip':
+                                continue
                             # TODO: set server timestamp, now there is assumption GMT+2
-                            timestamp = time.mktime(time.strptime(file[1]['modify'], "%Y%m%d%H%M%S"))
-                            result.append((skin, timestamp))
+                            timestamp = time.mktime(time.strptime(skin[1]['modify'], "%Y%m%d%H%M%S"))
+                            result.append(("{}/{}/{}/{}".format(base_path, id_[0], car[0], skin[0]),timestamp))
+
+            elif base_path == "acc":
+                ids = ftp.mlsd(base_path)
+                for id_ in ids:
+                    if id_[1]['type'] != 'dir':
+                        continue
+                    for skin in ftp.mlsd("{}/{}".format(base_path, id_[0])):
+                        if skin[1]["type"] != "file":
+                            continue
+                        r = skin[0].split('.')
+                        if len(r) != 2:
+                            continue
+                        if r[1] != 'zip':
+                            continue
+                        # TODO: set server timestamp, now there is assumption GMT+2
+                        timestamp = time.mktime(time.strptime(skin[1]['modify'], "%Y%m%d%H%M%S"))
+                        result.append(("{}/{}/{}".format(base_path, id_[0], skin[0]), timestamp))
             else:
                 raise Exception("Invalid base path")
             return result
 
+    @_refresh_config
     def download_file(self, file_path, file, progress_callback):
         with file as fd:
             with FTP(self.scheme.hostname) as ftp:
@@ -130,7 +148,8 @@ class LocalFileClient:
     def extract_temp(self):
         self.temp.close()
         try:
-            Archive(self.temp.name).extractall(self.skins_path, auto_create_dir=True)
+            with zipfile.ZipFile(self.temp.name, 'r') as zip_ref:
+                zip_ref.extractall(self.skins_path)
             mod_time = time.time()
             # TODO: set server timestamp, now there is assumption GMT+2
             os.utime(self.skin_path, (mod_time, mod_time))

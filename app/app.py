@@ -37,14 +37,15 @@ class App(MDApp):
                 return r'{}\steamapps\common\assettocorsa\content\cars'.format(steam_path)
 
         def _get_acc_dir():
-            d = Path(r'{}\Documents\Assetto Corsa Competizione\Customs\Liveries'.format(Path.home()))
+            d = Path(r'{}\Documents\Assetto Corsa Competizione'.format(Path.home()))
             if d.exists():
                 return str(d.absolute())
             return ""
         
         config.setdefaults('generic', {
-                'user': 'app',
-                'server': 'ftp://localhost'
+                'user': '',
+                'password': '',
+                'server': 'https://dev.simrace.pl'
             }
         )
 
@@ -62,6 +63,6 @@ class App(MDApp):
         return SettingsScreen()
 
     def build(self):
-        self.title = "simrace.pl - build v0.1.0-alpha-1"
+        self.title = "simrace.pl - build v0.1.0-alpha-2"
         self.icon = "icon.ico"
         return MainScreen()

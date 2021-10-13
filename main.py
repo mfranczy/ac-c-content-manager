@@ -1,5 +1,5 @@
 import os, sys
-from kivy.resources import resource_add_path, resource_find
+from kivy.resources import resource_add_path, resource_find  # import needed for packaging
 
 from app import App
 

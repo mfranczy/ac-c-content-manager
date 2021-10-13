@@ -16,25 +16,30 @@
     		theme_text_color: "Custom"
 		    text_color: get_color_from_hex("#333333")
 		    height: "30dp"
-
+	
 		MDTextField:
-			id: generic_user
-		    hint_text: "FTP user"
+			id: generic_server
+		    hint_text: "HTTP server address"
 		    required: True
-		    helper_text: "Created FTP user to login to the FTP server"
+		    helper_text: "HTTP server address to connect to"
 		    helper_text_mode: "on_focus"
 
 		MDTextField:
-			id: generic_server
-		    hint_text: "FTP server address"
-		    required: True
-		    helper_text: "FTP server address to connect to"
+			id: generic_user
+		    hint_text: "HTTP user (optional)"
+		    helper_text: "Created HTTP user to login to the server"
+		    helper_text_mode: "on_focus"
+
+		MDTextField:
+			id: generic_password
+		    hint_text: "HTTP server password (optional)"
+		    helper_text: "HTTP server password for the created user"
 		    helper_text_mode: "on_focus"
 
 		MDTextField:
 			id: ac_skins_dir
 		    hint_text: "Assetto Corsa skins directory"
-		    helper_text: "Leaving that field empty means ACC is not installed"
+		    helper_text: "Leaving that field empty means AC is not installed"
 		    helper_text_mode: "on_focus"
 
 		MDTextField:
@@ -58,17 +63,28 @@
 
 <LoaderScreen>:
 	name: "loader"
-    MDBoxLayout:
+	MDBoxLayout:
     	md_bg_color: get_color_from_hex("#222222")
-    	MDLabel:
-    		id: loader_label
-    		text: "Loading..."
-    		halign: "center"
-    		theme_text_color: "Custom"
-		    text_color: get_color_from_hex("#ffffff")
+    	orientation: "vertical"
+
+    	MDToolbar:
+	        title: "Content Manager"
+	        md_bg_color: get_color_from_hex("#333333")
+	        icon: "git"
+	        right_action_items: [["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
+
+	    MDBoxLayout:
+	    	md_bg_color: get_color_from_hex("#222222")
+		            
+	    	MDLabel:
+	    		id: loader_label
+	    		text: "Loading..."
+	    		halign: "center"
+	    		theme_text_color: "Custom"
+			    text_color: get_color_from_hex("#ffffff")
 
 <ContentScreen>:
-	name: "loader"
+	name: "content_screen"
     MDBoxLayout:
     	md_bg_color: get_color_from_hex("#222222")
     	orientation: "vertical"
@@ -77,11 +93,7 @@
 	        title: "Content Manager"
 	        md_bg_color: get_color_from_hex("#333333")
 	        icon: "git"
-	        left_action_items: [["menu", lambda x: root.menu.open_callback(x)]]
-
-			Image:
-				source: "logo.png"
-	            pos: (360, 0)
+	        right_action_items: [["cloud-download", lambda x: app.custom_dispatcher.do_download_all(x), "Download all"], ["cloud-refresh", lambda x: app.custom_dispatcher.do_recreate_all(x), "Recreate all"], ["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
 
 	    MDBoxLayout:
 			MDNavigationRail:
@@ -89,34 +101,24 @@
 	            md_bg_color: get_color_from_hex("#333333")
 	            color_normal: get_color_from_hex("#718089")
 	            color_active: get_color_from_hex("#f3ab44")
-	
+
+				MDNavigationRailItem:
+	                icon: "car-hatchback"
+	                text: "ACC"
+	                on_release:
+	                	content_manager.current = 'acc'
+	                	content_manager.transition.direction = "right"
+
 	            MDNavigationRailItem:
 	            	icon: "car-hatchback"
 	            	text: "AC"
 	            	on_release:
 	                	content_manager.current = 'ac'
-	                	content_manager.transition.direction = "right"
-	
-	            MDNavigationRailItem:
-	                icon: "car-hatchback"
-	                text: "ACC"
-	                on_release:
-	                	content_manager.current = 'acc'
 	                	content_manager.transition.direction = "left"
+
 
 			ScreenManager:
 				id: content_manager
-
-				MDScreen:
-					id: ac_screen
-					name: 'ac'
-					MDBoxLayout:
-						padding: "24dp"
-						ScrollView:
-							MDList:
-								id: ac_skins
-								spacing: "12dp"
-								cols: 1
 
 				MDScreen:
 					id: acc_screen
@@ -126,6 +128,17 @@
 						ScrollView:
 							MDList:
 								id: acc_skins
+								spacing: "12dp"
+								cols: 1
+
+				MDScreen:
+					id: ac_screen
+					name: 'ac'
+					MDBoxLayout:
+						padding: "24dp"
+						ScrollView:
+							MDList:
+								id: ac_skins
 								spacing: "12dp"
 								cols: 1
 

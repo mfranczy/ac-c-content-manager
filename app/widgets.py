@@ -11,17 +11,17 @@ from kivy.utils import get_color_from_hex
 from kivy.metrics import dp
 from kivymd.uix.menu import MDDropdownMenu
 
-from .clients import FTPClient, LocalFileClient
+from app.clients import LocalFileClient, HTTPClient
 from app.threads import ThreadPool
 
 
 class MenuWidget(MDDropdownMenu):
-    
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, disabled_items=[], *args, **kwargs):
         self.app = MDApp.get_running_app()
         self.dispatcher = self.app.custom_dispatcher
         self.width_mult = 4
-        self.items = self.menu_items()
+        self.items = self.menu_items(disabled_items)
         super(MenuWidget, self).__init__(*args, **kwargs)
         
 
@@ -29,33 +29,44 @@ class MenuWidget(MDDropdownMenu):
         self.caller = button
         self.open()
 
-    def menu_items(self):
-        return [
+    def menu_items(self, disabled_items):
+        items = [
             {
-               "viewclass": "OneLineListItem",
-               "text": "Refresh",
-               "height": dp(56),
-               "on_release": self.refresh,
+                "name": "refresh",
+                "viewclass": "OneLineListItem",
+                "text": "Refresh",
+                "height": dp(56),
+                "on_release": self.refresh,
             },
             {
-               "viewclass": "OneLineListItem",
-               "text": "Recreate all",
-               "height": dp(56),
-               "on_release": self.recreate_all,
+                "name": "recreate_all",
+                "viewclass": "OneLineListItem",
+                "text": "Recreate all",
+                "height": dp(56),
+                "on_release": self.recreate_all,
             },
             {
-               "viewclass": "OneLineListItem",
-               "text": "Download all",
-               "height": dp(56),
-               "on_release": self.download_all,
+                "name": "download_all",
+                "viewclass": "OneLineListItem",
+                "text": "Download all",
+                "height": dp(56),
+                "on_release": self.download_all,
             },
             {
-               "viewclass": "OneLineListItem",
-               "text": "Settings",
-               "height": dp(56),
-               "on_release": self.app.open_settings,
+                "name": "settings",
+                "viewclass": "OneLineListItem",
+                "text": "Settings",
+                "height": dp(56),
+                "on_release": self.app.open_settings,
             }
         ]
+        
+        result = []
+        for item in items:
+            if item["name"] in disabled_items:
+                continue
+            result.append(item)
+        return result
 
     def _menu_item(func):
         def wrapper(self):
@@ -81,7 +92,7 @@ class MenuWidget(MDDropdownMenu):
 
 
 class SkinWidget(MDGridLayout):
-    
+
     _STATE_MISSING = "missing"
     _STATE_RECREATE = "recreate"
     _STATE_DOWNLOAD = "download"
@@ -89,38 +100,40 @@ class SkinWidget(MDGridLayout):
 
     __slots__ = ('id', 'desc_label', 'percentage_label', 'progressbar', 'download_button', 'temp_size')
 
-    def __init__(self, remote_skin_path, remote_timestamp, skin_type):
-        self.remote_timestamp = remote_timestamp
-        self.remote_skin_path = remote_skin_path
+    def __init__(self, skin, skin_type):
+        self.sum_control = skin.get('sum')
+        self.car_name = skin.get('car_name')
+        self.skin_name, self.skin_ext = skin.get('skin_name').split('.')
+        self.league_id = skin.get('league_id')
+        self.skin_type = skin_type
+        self.remote_skin_path = '/api/skins/{}/{}/{}/download'.format(self.league_id, self.car_name, self.skin_name)
         super(SkinWidget, self).__init__()
 
-        self.skin_type = skin_type
         self.pool = ThreadPool()
-
         app = MDApp.get_running_app()
         self.config = app.config
         self.dispatcher = app.custom_dispatcher
+        self.dispatcher.bind(on_refresh=self.on_refresh)
 
-        self.ftp = FTPClient()
-        self.local_file = LocalFileClient(remote_skin_path, self.config.get(skin_type, "skins_dir"), skin_type)
+        self.http_client = HTTPClient()
+        self.local_file = LocalFileClient(self.skin_type, self.config.get(self.skin_type, "skins_dir"), self.car_name, self.skin_name, self.skin_ext)
 
         self.set_attr()
         self.register_events()
         Clock.schedule_once(self.set_description)
         Clock.schedule_once(self.refresh_state)
         self.download_in_progress = False
+        self.refresh_required = False
 
     @property
     def name(self):
-        if self.skin_type == "ac":
-            s = self.remote_skin_path.split("/")
-            return "{}/{}".format(s[2], s[3])
-        elif self.skin_type == "acc":
-            return self.remote_skin_path.split("/")[2]
-        raise Exception("Unkown skin type: {}".format(self.skin_type))
+        return "{}/{}".format(self.car_name, self.skin_name)
 
     def set_description(self, dt):
         self.desc_label.text = self.name
+
+    def on_refresh(self, *args):
+        Clock.schedule_once(self.refresh_state)
 
     @mainthread
     def refresh_state(self, dt):
@@ -129,7 +142,7 @@ class SkinWidget(MDGridLayout):
         update_color = get_color_from_hex("#03fcf8")
         lock_color = get_color_from_hex("#ff0000")
 
-        if not self.local_file.car_exists:
+        if not self.local_file.car_exists and self.skin_type == 'ac':
             # Car files missing - cannot install skins
             self.state = self._STATE_MISSING
 
@@ -137,8 +150,8 @@ class SkinWidget(MDGridLayout):
             self.download_button.lock_color = lock_color
             self.download_button.md_bg_color_disabled = get_color_from_hex("#e85d1c")
             self.download_button.text = "Missing car"
-        elif self.local_file.skin_exists:
-            if self.remote_timestamp > self.local_file.timestamp:
+        elif self.local_file.car_exists and self.local_file.skin_exists:
+            if self.refresh_required:
                 # Files downloaded but new version discovered on the server - update phase
                 self.state = self._STATE_UPDATE
 
@@ -196,7 +209,7 @@ class SkinWidget(MDGridLayout):
             try:
                 Clock.schedule_once(self.set_download_btn_ui)
                 temp_file = self.local_file.create_temp()
-                self.ftp.download_file(self.remote_skin_path, temp_file, self.download_progress)
+                self.http_client.download_file(self.remote_skin_path, temp_file, self.download_progress)
                 Clock.schedule_once(self.set_extract_btn_ui)
                 self.local_file.extract_temp()
             except Exception as exc:
@@ -204,6 +217,7 @@ class SkinWidget(MDGridLayout):
             finally:
                 Clock.schedule_once(self.refresh_state)
                 self.download_in_progress = False
+                self.refresh_required = False
 
         self.pool.submit(_download)
 
@@ -216,12 +230,11 @@ class SkinWidget(MDGridLayout):
             bg_color=get_color_from_hex("#544746")
         ).open()
 
-    def download_progress(self, max_size, fd, data):
-        fd.write(data)
-        self.temp_size += len(data)
+    def download_progress(self, max_size, chunk_size):
+        self.temp_size += chunk_size
         percent = int(self.temp_size * 100 / max_size)
         Clock.schedule_once(partial(self.update_progress_bar, percent))
-        
+
     @mainthread
     def set_pre_download_btn_ui(self, dt):
         self.progressbar.value = 0

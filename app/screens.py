@@ -19,6 +19,8 @@ class MainScreen(ScreenManager):
         self.app.custom_dispatcher.bind(on_refresh=self.on_refresh)
 
     def on_refresh(self, *args):
+        self.content.ids.acc_skins.clear_widgets()
+        self.content.ids.ac_skins.clear_widgets()
         self.loader.switch_screen()
 
     def _register_screens(self):
@@ -75,9 +77,12 @@ class ContentScreen(MDScreen):
         super(ContentScreen, self).__init__(*args, **kwargs)
 
     def on_initialize(self, obj):
+        left_skins = list(self.skins.keys())
         for skin in self.manager.http_client.list_skins():
             skin_id = "{}_{}_{}_{}".format(skin["game_id"], skin["league_id"], skin["car_name"], skin["skin_name"])
-            
+            if skin_id in left_skins:
+                left_skins.remove(skin_id)
+
             game_id = int(skin['game_id'])
             skin_type = ""
             if game_id == self._ACC_ID:
@@ -85,19 +90,24 @@ class ContentScreen(MDScreen):
             elif game_id == self._AC_ID:
                 skin_type = 'ac'
             else:
-                continue  
+                continue
 
-            if self.skins.get(skin_id):
-                if self.skins[skin_id].sum_control != skin['sum']:
-                    self.skins[skin_id].refresh_required = True
-                    self.skins[skin_id].sum_control = skin['sum']
-            else:
+            widget = self.skins.get(skin_id)
+            if widget is None:
                 widget = SkinWidget(skin, skin_type)
                 self.skins[skin_id] = widget
-                if game_id == self._ACC_ID:   
-                    self.ids.acc_skins.add_widget(widget)
-                elif game_id == self._AC_ID:
-                    self.ids.ac_skins.add_widget(widget)
+            else:
+                widget.remote_timestamp = skin['timestamp']
+
+            if game_id == self._ACC_ID:
+                self.ids.acc_skins.add_widget(widget)
+            elif game_id == self._AC_ID:
+                self.ids.ac_skins.add_widget(widget)
+
+        for skin in left_skins:
+            widget = self.skins.pop(skin)
+            widget.unregister_events()
+            del widget
 
         self.switch_screen()
 

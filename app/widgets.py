@@ -107,23 +107,22 @@ class SkinWidget(MDGridLayout):
         self.league_id = skin.get('league_id')
         self.skin_type = skin_type
         self.remote_skin_path = '/api/skins/{}/{}/{}/download'.format(self.league_id, self.car_name, self.skin_name)
+        self.remote_timestamp = skin.get('timestamp')
         super(SkinWidget, self).__init__()
 
         self.pool = ThreadPool()
         app = MDApp.get_running_app()
         self.config = app.config
         self.dispatcher = app.custom_dispatcher
-        self.dispatcher.bind(on_refresh=self.on_refresh)
 
         self.http_client = HTTPClient()
-        self.local_file = LocalFileClient(self.skin_type, self.config.get(self.skin_type, "skins_dir"), self.car_name, self.skin_name, self.skin_ext)
+        self.local_file = LocalFileClient(self.skin_type, self.car_name, self.skin_name, self.skin_ext)
 
         self.set_attr()
         self.register_events()
         Clock.schedule_once(self.set_description)
         Clock.schedule_once(self.refresh_state)
         self.download_in_progress = False
-        self.refresh_required = False
 
     @property
     def name(self):
@@ -141,7 +140,6 @@ class SkinWidget(MDGridLayout):
         download_color = get_color_from_hex("#ff8000")
         update_color = get_color_from_hex("#03fcf8")
         lock_color = get_color_from_hex("#ff0000")
-
         if not self.local_file.car_exists and self.skin_type == 'ac':
             # Car files missing - cannot install skins
             self.state = self._STATE_MISSING
@@ -151,7 +149,7 @@ class SkinWidget(MDGridLayout):
             self.download_button.md_bg_color_disabled = get_color_from_hex("#e85d1c")
             self.download_button.text = "Missing car"
         elif self.local_file.car_exists and self.local_file.skin_exists:
-            if self.refresh_required:
+            if self.remote_timestamp > self.local_file.timestamp:
                 # Files downloaded but new version discovered on the server - update phase
                 self.state = self._STATE_UPDATE
 
@@ -190,8 +188,15 @@ class SkinWidget(MDGridLayout):
 
     def register_events(self):
         self.download_button.bind(on_release=self.download_start)
+        self.dispatcher.bind(on_refresh=self.on_refresh)
         self.dispatcher.bind(on_recreate_all=self.download_start)
         self.dispatcher.bind(on_download_all=self.on_download_all)
+
+    def unregister_events(self):
+        self.download_button.unbind(on_release=self.download_start)
+        self.dispatcher.unbind(on_refresh=self.on_refresh)
+        self.dispatcher.unbind(on_recreate_all=self.download_start)
+        self.dispatcher.unbind(on_download_all=self.on_download_all)
 
     def on_download_all(self, *args):
         if self.state in (self._STATE_DOWNLOAD, self._STATE_UPDATE):
@@ -201,7 +206,6 @@ class SkinWidget(MDGridLayout):
         if self.download_in_progress:
             return
         self.download_in_progress = True
-
         self.temp_size = 0
         Clock.schedule_once(self.set_pre_download_btn_ui)
 
@@ -217,7 +221,6 @@ class SkinWidget(MDGridLayout):
             finally:
                 Clock.schedule_once(self.refresh_state)
                 self.download_in_progress = False
-                self.refresh_required = False
 
         self.pool.submit(_download)
 

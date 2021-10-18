@@ -63,6 +63,6 @@ class App(MDApp):
         return SettingsScreen()
 
     def build(self):
-        self.title = "simrace.pl - build v0.1.0-alpha-2"
+        self.title = "simrace.pl - build v0.1.0-alpha-3"
         self.icon = "icon.ico"
         return MainScreen()

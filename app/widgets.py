@@ -23,7 +23,6 @@ class MenuWidget(MDDropdownMenu):
         self.width_mult = 4
         self.items = self.menu_items(disabled_items)
         super(MenuWidget, self).__init__(*args, **kwargs)
-        
 
     def open_callback(self, button):
         self.caller = button
@@ -124,12 +123,8 @@ class SkinWidget(MDGridLayout):
         Clock.schedule_once(self.refresh_state)
         self.download_in_progress = False
 
-    @property
-    def name(self):
-        return "{}/{}".format(self.car_name, self.skin_name)
-
     def set_description(self, dt):
-        self.desc_label.text = self.name
+        self.desc_label.text = self.skin_name
 
     def on_refresh(self, *args):
         Clock.schedule_once(self.refresh_state)

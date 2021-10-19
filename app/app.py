@@ -22,7 +22,6 @@ class App(MDApp):
         super(App, self).__init__(*args, **kwargs)
 
     def build_config(self, config):
-
         def _get_ac_dir():
             try:
                 hkey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\WOW6432Node\Valve\Steam")
@@ -45,7 +44,7 @@ class App(MDApp):
         config.setdefaults('generic', {
                 'user': '',
                 'password': '',
-                'server': 'https://dev.simrace.pl'
+                'server': 'https://esport.simrace.pl'
             }
         )
 
@@ -63,6 +62,6 @@ class App(MDApp):
         return SettingsScreen()
 
     def build(self):
-        self.title = "simrace.pl - build v0.1.0-alpha-3"
+        self.title = "simrace.pl - build v0.1.0-alpha-4"
         self.icon = "icon.ico"
         return MainScreen()

@@ -3,6 +3,7 @@ import shutil
 import tempfile
 import zipfile
 import requests
+import time
 
 from datetime import datetime
 from pytz import timezone
@@ -134,6 +135,8 @@ class LocalFileClient:
         try:
             with zipfile.ZipFile(self.temp.name, 'r') as zip_ref:
                 zip_ref.extractall(self.extract_path)
+            mod_time = cet_timestamp(time.time())
+            os.utime(self.skin_path, (mod_time, mod_time))
         except Exception as exc:
             shutil.rmtree(self.skin_path)
             raise exc

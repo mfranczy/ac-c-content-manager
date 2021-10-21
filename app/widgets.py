@@ -100,11 +100,25 @@ class SkinWidget(MDGridLayout):
     __slots__ = ('id', 'desc_label', 'percentage_label', 'progressbar', 'download_button', 'temp_size')
 
     def __init__(self, skin, skin_type):
+        # TODO: do refactoring of fields, it's a mess now
         self.sum_control = skin.get('sum')
-        self.car_name = skin.get('car_name')
         self.skin_name, self.skin_ext = skin.get('skin_name').split('.')
+        
+        # HACKY - FIX ME, the field should not be called car_name
+        s = self.skin_name.split("-") 
+        self.car_name = s[1]
+        # END OF FIX ME
+
         self.league_id = skin.get('league_id')
         self.skin_type = skin_type
+
+        # new fields
+        self.driver_name = skin.get('driver_name', '')
+        self.league_name = skin.get('league_name', '')
+        self.car_name_ext = skin.get('car_name', '')
+        self.car_class = skin.get('car_class', '')
+        self.car_year = skin.get('car_year', '')
+
         self.remote_skin_path = '/api/skins/{}/{}/{}/download'.format(self.league_id, self.car_name, self.skin_name)
         self.remote_timestamp = skin.get('timestamp')
         super(SkinWidget, self).__init__()
@@ -124,7 +138,7 @@ class SkinWidget(MDGridLayout):
         self.download_in_progress = False
 
     def set_description(self, dt):
-        self.desc_label.text = self.skin_name
+        self.desc_label.text = "[color=8fce00]{}[/color]\n[color=ff8000]{}[/color] {} {} {}".format(self.league_name, self.driver_name, self.car_name_ext, self.car_year, self.car_class)
 
     def on_refresh(self, *args):
         Clock.schedule_once(self.refresh_state)
@@ -222,7 +236,7 @@ class SkinWidget(MDGridLayout):
     def report_error(self, exc, dt):
         Snackbar(
             text="[color=#f2776d]ERROR: {}[/color]".format(exc),
-            size_hint_x=.7,
+            size_hint_x=1,
             snackbar_y="30dp",
             snackbar_x="30dp",
             bg_color=get_color_from_hex("#544746")

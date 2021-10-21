@@ -1,6 +1,5 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 
-
 <SettingsScreen>:
 	name: "settings"
     MDBoxLayout:
@@ -71,7 +70,7 @@
 	        title: "Content Manager"
 	        md_bg_color: get_color_from_hex("#333333")
 	        icon: "git"
-	        right_action_items: [["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
+	        right_action_items: [["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["database", lambda x: app.open_backup(x), "Backup"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
 
 	    MDBoxLayout:
 	    	md_bg_color: get_color_from_hex("#222222")
@@ -93,7 +92,7 @@
 	        title: "Content Manager"
 	        md_bg_color: get_color_from_hex("#333333")
 	        icon: "git"
-	        right_action_items: [["cloud-refresh", lambda x: app.custom_dispatcher.do_recreate_all(x), "Recreate all"], ["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
+	        right_action_items: [["cloud-refresh", lambda x: app.custom_dispatcher.do_recreate_all(x), "Recreate all"], ["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["database", lambda x:  app.open_backup(x), "Backup"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
 
 	    MDBoxLayout:
 			orientation: "vertical"
@@ -188,8 +187,8 @@
 
 <SkinWidget>:
 	md_bg_color: get_color_from_hex("#333333")
-	padding: "10dp"
-	spacing: ["10dp", 0]
+	padding: "5dp"
+	spacing: ["15dp", 0]
 	cols: 4
     orientation: "tb-lr"
     size_hint_y: None
@@ -200,6 +199,7 @@
 		id: "desc_text"
         text: ""
         valign: "center"
+        markup: True
         color: get_color_from_hex("#718089")
 
     PercentageLabelWidget:
@@ -223,3 +223,63 @@
 	    text: "Download"
 	    text_color: get_color_from_hex("#718089")
 	    line_color: get_color_from_hex("#ff8000")
+
+<BackupScreen>:
+	name: "backup"
+	MDBoxLayout:
+		orientation: "vertical"
+		md_bg_color: get_color_from_hex("#ffffff")
+		padding: ("10dp", "30dp")
+		spacing: "20dp"
+
+		MDLabel:
+    		halign: "center"
+    		id: backup_label
+    		text: "ACC Cars and Liveries Backup:"
+    		theme_text_color: "Custom"
+		    text_color: get_color_from_hex("#333333")
+
+		GridLayout:
+			cols: 3
+			padding: "30dp"
+			spacing: "25dp"
+			
+			AnchorLayout:
+				anchor_x: 'right'
+				anchor_y: 'top'
+
+				MDRectangleFlatButton:
+				    text: "Create backup"
+				    text_color: get_color_from_hex("333333")
+				    line_color: get_color_from_hex("333333")
+				    on_release: root.create_backup()
+
+			AnchorLayout:
+				anchor_x: 'center'
+				anchor_y: 'top'
+
+				MDRectangleFlatButton:
+				    text: "Restore backup"
+				    text_color: get_color_from_hex("333333")
+				    line_color: get_color_from_hex("333333")
+				    on_release: root.restore_backup()
+
+			AnchorLayout:
+				anchor_x: 'left'
+				anchor_y: 'top'
+
+				MDRectangleFlatButton:
+				    text: "Clean customs"
+				    text_color: get_color_from_hex("333333")
+				    line_color: get_color_from_hex("333333")
+				    on_release: root.clean_customs()
+
+		AnchorLayout:
+			anchor_x: 'center'
+			anchor_y: 'top'
+
+			MDRectangleFlatButton:
+			    text: "Exit"
+			    text_color: get_color_from_hex("333333")
+			    line_color: get_color_from_hex("333333")
+			    on_release: root.manager.current = 'content'

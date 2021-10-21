@@ -58,10 +58,15 @@ class App(MDApp):
             },
         )
 
+        config.setdefaults('backup', {
+                "destination_path": "{}\\backup".format(os.environ['KIVY_HOME'])
+            },
+        )
+
     def create_settings(self):
         return SettingsScreen()
 
     def build(self):
-        self.title = "simrace.pl - build v0.1.0-alpha-4"
+        self.title = "simrace.pl - build v0.1.0-alpha-5"
         self.icon = "icon.ico"
         return MainScreen()

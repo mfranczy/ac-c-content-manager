@@ -16,7 +16,9 @@ from .dispatcher import CustomDispatcher
 
 
 class App(MDApp):
-    
+
+    main_menu = []
+
     def __init__(self, *args, **kwargs):
         self.custom_dispatcher = CustomDispatcher()
         super(App, self).__init__(*args, **kwargs)
@@ -67,6 +69,6 @@ class App(MDApp):
         return SettingsScreen()
 
     def build(self):
-        self.title = "simrace.pl - build v0.1.0-alpha-5"
+        self.title = "simrace.pl - build v0.1.0-beta-1"
         self.icon = "icon.ico"
         return MainScreen()

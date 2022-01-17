@@ -15,6 +15,41 @@ from app.clients import LocalFileClient, HTTPClient
 from app.threads import ThreadPool
 
 
+class LeagueButtonWidget(MDRectangleFlatButton):
+
+    def __init__(self, id_, text, active, *args, **kwargs):
+        self.app = MDApp.get_running_app()
+
+        self.active = active
+        if self.active:
+            self.set_active()
+        else: 
+            self.set_deactive()
+
+        self.app = MDApp.get_running_app()
+        self.id = id_
+        self.text = text
+
+        super(LeagueButtonWidget, self).__init__(*args, **kwargs)
+
+    def set_active(self):
+        self.text_color = get_color_from_hex("#ffffff")
+        self.line_color = get_color_from_hex("#b2e73b")
+
+    def set_deactive(self):
+        self.text_color = get_color_from_hex("#718089")
+        self.line_color =  get_color_from_hex("#8fce00")
+
+    def on_release(self):
+        for button in self.app.root.content.ids.leagues_buttons.children:
+            button.text_color = get_color_from_hex("#718089")
+            button.line_color =  get_color_from_hex("#8fce00")
+
+        self.text_color = get_color_from_hex("#ffffff")
+        self.line_color = get_color_from_hex("#b2e73b")
+        self.app.root.content.ids.content_manager.current = self.id
+
+
 class MenuWidget(MDDropdownMenu):
 
     def __init__(self, disabled_items=[], *args, **kwargs):

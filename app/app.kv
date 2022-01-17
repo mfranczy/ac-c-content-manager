@@ -1,4 +1,5 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import NoTransition kivy.uix.screenmanager.NoTransition
 
 <SettingsScreen>:
 	name: "settings"
@@ -84,6 +85,7 @@
 
 <ContentScreen>:
 	name: "content_screen"
+
     MDBoxLayout:
     	md_bg_color: get_color_from_hex("#222222")
     	orientation: "vertical"
@@ -102,52 +104,12 @@
 				height: 60
 				size_hint_y: None
 
-				GridLayout:
-					cols: 2
-
-					AnchorLayout:
-						anchor_x: 'left'
-						anchor_y: 'bottom'
-		    			width: 220
-		    			size_hint_x: None
-
-						MDRectangleFlatButton:
-							id: acc_button
-						    text: "Assetto Corsa Competizione"
-						    text_color: get_color_from_hex("#ffffff")
-	    					line_color: get_color_from_hex("#b2e73b")
-	    					on_release:
-	    						self.text_color = get_color_from_hex("#ffffff")
-	    						self.line_color = get_color_from_hex("#b2e73b")
-	    						root.ids.ac_button.text_color = get_color_from_hex("#718089")
-	    						root.ids.ac_button.line_color =  get_color_from_hex("#8fce00")
-	    						content_manager.current = 'acc'
-	                			content_manager.transition.direction = "right"
-
-					AnchorLayout:
-						anchor_x: 'left'
-						anchor_y: 'bottom'
-		    			adaptive_width: True
-
-						MDRectangleFlatButton:
-							id: ac_button
-						    text: "Assetto Corsa"
-						    text_color: get_color_from_hex("#718089")
-	    					line_color: get_color_from_hex("#8fce00")
-	    					on_release:
-	    						self.text_color = get_color_from_hex("#ffffff")
-	    						self.line_color = get_color_from_hex("#b2e73b")
-	    						root.ids.acc_button.text_color = get_color_from_hex("#718089")
-	    						root.ids.acc_button.line_color =  get_color_from_hex("#8fce00")
-	    						content_manager.current = 'ac'
-	                			content_manager.transition.direction = "left"
+				MDBoxLayout:
+					id: leagues_buttons
+					spacing: "10dp"
 
 				GridLayout:
-					cols: 2
-
-					AnchorLayout:
-						anchor_x: 'right'
-						anchor_y: 'bottom'
+					cols: 1
 
 					AnchorLayout:
 						anchor_x: 'right'
@@ -162,28 +124,15 @@
 
 			ScreenManager:
 				id: content_manager
+				transition: NoTransition()
 
-				MDScreen:
-					id: acc_screen
-					name: 'acc'
-					MDBoxLayout:
-						padding: "24dp"
-						ScrollView:
-							MDList:
-								id: acc_skins
-								spacing: "12dp"
-								cols: 1
-
-				MDScreen:
-					id: ac_screen
-					name: 'ac'
-					MDBoxLayout:
-						padding: "24dp"
-						ScrollView:
-							MDList:
-								id: ac_skins
-								spacing: "12dp"
-								cols: 1
+<SkinScreen>:
+	MDBoxLayout:
+		padding: "24dp"
+		ScrollView:
+			MDList:
+				spacing: "12dp"
+				cols: 1
 
 <SkinWidget>:
 	md_bg_color: get_color_from_hex("#333333")

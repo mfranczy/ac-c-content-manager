@@ -9,11 +9,12 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivymd.app import MDApp
 from kivy.clock import Clock
-from kivy.uix.screenmanager import ScreenManager, FadeTransition
+from kivy.uix.screenmanager import ScreenManager, FadeTransition,\
+    ScreenManagerException
 from kivymd.uix.snackbar import Snackbar
 from kivy.utils import get_color_from_hex
 
-from .widgets import MenuWidget, SkinWidget
+from .widgets import MenuWidget, SkinWidget, LeagueButtonWidget
 from .clients import HTTPClient
 
 
@@ -28,8 +29,9 @@ class MainScreen(ScreenManager):
         self.app.custom_dispatcher.bind(on_refresh=self.on_refresh)
 
     def on_refresh(self, *args):
-        self.content.ids.acc_skins.clear_widgets()
-        self.content.ids.ac_skins.clear_widgets()
+        for screen in self.content.ids.content_manager.screens:
+            # TODO: very hacky - fix me
+            screen.children[0].children[0].children[0].clear_widgets()
         self.loader.switch_screen()
 
     def _register_screens(self):
@@ -43,6 +45,7 @@ class MainScreen(ScreenManager):
         self.add_widget(self.loader)
         self.add_widget(self.content)
         self.add_widget(self.backup)
+
 
 class LoaderScreen(MDScreen):
 
@@ -85,12 +88,34 @@ class ContentScreen(MDScreen):
 
     def __init__(self, *args, **kwargs):
         self.menu = MenuWidget()
+        self.league_skins = {}
         self.skins = {}
         super(ContentScreen, self).__init__(*args, **kwargs)
 
     def on_initialize(self, obj):
         left_skins = list(self.skins.keys())
+        active = True
         for skin in self.manager.http_client.list_skins():
+            league_id = "league_" + str(skin['league_id'])
+            if not league_id in self.league_skins:
+                self.manager.content.ids.leagues_buttons.add_widget(
+                    LeagueButtonWidget(league_id, skin['league_name'], active)
+                )
+                active = False
+                self.manager.content.ids.content_manager.add_widget(
+                    SkinScreen(league_id)
+                )
+                self.league_skins[league_id] = True
+
+            try:
+                screen = self.manager.content.ids.content_manager.get_screen(league_id)
+            except ScreenManagerException:
+                # TODO: log errors here
+                continue
+            
+            # TODO: very hacky - fix me
+            list_view = screen.children[0].children[0].children[0]
+
             skin_id = "{}_{}_{}_{}".format(skin["game_id"], skin["league_id"], skin["car_name"], skin["skin_name"])
             if skin_id in left_skins:
                 left_skins.remove(skin_id)
@@ -110,11 +135,7 @@ class ContentScreen(MDScreen):
                 self.skins[skin_id] = widget
             else:
                 widget.remote_timestamp = skin['timestamp']
-
-            if game_id == self._ACC_ID:
-                self.ids.acc_skins.add_widget(widget)
-            elif game_id == self._AC_ID:
-                self.ids.ac_skins.add_widget(widget)
+            list_view.add_widget(widget)
 
         for skin in left_skins:
             widget = self.skins.pop(skin)
@@ -312,3 +333,11 @@ class BackupScreen(MDScreen):
             self.clean_dialog.open()
         else:
             action_confirm()
+
+
+class SkinScreen(MDScreen):
+
+    def __init__(self, id_, *args, **kwargs):
+        self.id = str(id_)
+        self.name = str(id_)
+        super(SkinScreen, self).__init__(*args, **kwargs)

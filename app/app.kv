@@ -1,6 +1,67 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 
+<BackupScreen>:
+	name: "backup"
+	MDBoxLayout:
+		orientation: "vertical"
+		md_bg_color: get_color_from_hex("#ffffff")
+		padding: ("10dp", "30dp")
+		spacing: "20dp"
+
+		MDLabel:
+    		halign: "center"
+    		id: backup_label
+    		text: "ACC Cars and Liveries Backup:"
+    		theme_text_color: "Custom"
+		    text_color: get_color_from_hex("#333333")
+
+		GridLayout:
+			cols: 3
+			padding: "30dp"
+			spacing: "25dp"
+			
+			AnchorLayout:
+				anchor_x: 'right'
+				anchor_y: 'top'
+
+				MDRectangleFlatButton:
+				    text: "Create backup"
+				    text_color: get_color_from_hex("333333")
+				    line_color: get_color_from_hex("333333")
+				    on_release: root.create_backup()
+
+			AnchorLayout:
+				anchor_x: 'center'
+				anchor_y: 'top'
+
+				MDRectangleFlatButton:
+				    text: "Restore backup"
+				    text_color: get_color_from_hex("333333")
+				    line_color: get_color_from_hex("333333")
+				    on_release: root.restore_backup()
+
+			AnchorLayout:
+				anchor_x: 'left'
+				anchor_y: 'top'
+
+				MDRectangleFlatButton:
+				    text: "Clean customs"
+				    text_color: get_color_from_hex("333333")
+				    line_color: get_color_from_hex("333333")
+				    on_release: root.clean_customs()
+
+		AnchorLayout:
+			anchor_x: 'center'
+			anchor_y: 'top'
+
+			MDRectangleFlatButton:
+			    text: "Exit"
+			    text_color: get_color_from_hex("333333")
+			    line_color: get_color_from_hex("333333")
+			    on_release: root.manager.current = 'content'
+
+
 <SettingsScreen>:
 	name: "settings"
     MDBoxLayout:
@@ -67,12 +128,84 @@
     	md_bg_color: get_color_from_hex("#222222")
     	orientation: "vertical"
 
-    	MDToolbar:
-	        title: "Content Manager"
-	        md_bg_color: get_color_from_hex("#333333")
-	        icon: "git"
-	        right_action_items: [["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["database", lambda x: app.open_backup(x), "Backup"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
+    	MDGridLayout:
+			md_bg_color: get_color_from_hex("#333333")
+			cols: 2
+			size_hint_y: None
+			height: 63
 
+			MDBoxLayout:
+				padding: ('18dp', '16dp')
+				spacing: '0dp'
+
+				Image:
+    			    source: 'logo.png'
+					size_hint: None, None
+					size: 96, 31
+					allow_stretch: True
+					keep_ratio: False
+
+				Label:
+					font_size: '24px'
+					size_hint: None, None
+					size: 250, 31
+					text: 'Content Manager'
+
+			MDBoxLayout:
+				spacing: 10
+				padding: 35, 15
+
+				MDBoxLayout:
+					size_hint: None, None
+					size: 100, 33
+					padding: 5, 0
+	    		
+	    		MDBoxLayout:
+	    			padding: 5, 0
+	    			size_hint: None, None
+					size: 130, 33
+
+				ToolbarItemWidget:
+					padding: 5, 0
+					size_hint: None, None
+					size: 100, 33
+					action: app.custom_dispatcher.do_open_backup
+
+					MDIcon:
+						size_hint: None, None
+						size: 30, 33
+						icon: 'database'
+						theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+	    				halign: 'center'
+
+	    			MDLabel:
+	    				bold: True
+	    				text: 'BACKUP'
+	    				font_size: '12px'
+	    				theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+
+				ToolbarItemWidget:
+					size_hint: None, None
+					size: 100, 33
+					padding: 5, 0
+					action: app.open_settings
+
+					MDIcon:
+						size_hint: None, None
+						size: 30, 33
+						icon: 'cog-outline'
+						theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+
+	    			MDLabel:
+	    				bold: True
+	    				text: 'SETTINGS'
+	    				font_size: '12px'
+	    				theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+    	
 	    MDBoxLayout:
 	    	md_bg_color: get_color_from_hex("#222222")
 
@@ -90,11 +223,114 @@
     	md_bg_color: get_color_from_hex("#222222")
     	orientation: "vertical"
 
-	    MDToolbar:
-	        title: "Content Manager"
-	        md_bg_color: get_color_from_hex("#333333")
-	        icon: "git"
-	        right_action_items: [["cloud-refresh", lambda x: app.custom_dispatcher.do_recreate_all(x), "Recreate all"], ["refresh", lambda x: app.custom_dispatcher.do_refresh(x), "Refresh"], ["database", lambda x:  app.open_backup(x), "Backup"], ["cog-outline", lambda x: app.open_settings(x), "Settings"]]
+		MDGridLayout:
+			md_bg_color: get_color_from_hex("#333333")
+			cols: 2
+			size_hint_y: None
+			height: 63
+
+			MDBoxLayout:
+				padding: ('18dp', '16dp')
+				spacing: '0dp'
+
+				Image:
+    			    source: 'logo.png'
+					size_hint: None, None
+					size: 96, 31
+					allow_stretch: True
+					keep_ratio: False
+
+				Label:
+					font_size: '24px'
+					size_hint: None, None
+					size: 250, 31
+					text: 'Content Manager'
+
+			MDBoxLayout:
+				spacing: 10
+				padding: 35, 15
+
+				ToolbarItemWidget:
+					size_hint: None, None
+					size: 100, 33
+					padding: 5, 0
+					action: app.custom_dispatcher.do_refresh
+
+					MDIcon:
+						size_hint: None, None
+						size: 30, 33
+						icon: 'refresh'
+						theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+	    				
+
+	    			MDLabel:
+	    				bold: True
+	    				text: 'REFRESH'
+	    				font_size: '12px'
+	    				theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+	    		
+	    		ToolbarItemWidget:
+	    			padding: 5, 0
+	    			size_hint: None, None
+					size: 130, 33
+					action: app.custom_dispatcher.do_recreate_all
+
+					MDIcon:
+						size_hint: None, None
+						size: 30, 33
+						icon: 'cloud-refresh'
+						theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+
+	    			MDLabel:
+	    				bold: True
+	    				text: 'RECREATE ALL'
+	    				font_size: '12px'
+	    				theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+
+				ToolbarItemWidget:
+					padding: 5, 0
+					size_hint: None, None
+					size: 100, 33
+					action: app.custom_dispatcher.do_open_backup
+
+					MDIcon:
+						size_hint: None, None
+						size: 30, 33
+						icon: 'database'
+						theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+	    				halign: 'center'
+
+	    			MDLabel:
+	    				bold: True
+	    				text: 'BACKUP'
+	    				font_size: '12px'
+	    				theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+
+				ToolbarItemWidget:
+					size_hint: None, None
+					size: 100, 33
+					padding: 5, 0
+					action: app.open_settings
+
+					MDIcon:
+						size_hint: None, None
+						size: 30, 33
+						icon: 'cog-outline'
+						theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+
+	    			MDLabel:
+	    				bold: True
+	    				text: 'SETTINGS'
+	    				font_size: '12px'
+	    				theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
 
 	    MDBoxLayout:
 			orientation: "vertical"
@@ -106,7 +342,7 @@
 
 				MDBoxLayout:
 					id: leagues_buttons
-					spacing: "10dp"
+					spacing: "20"
 
 				GridLayout:
 					cols: 1
@@ -116,11 +352,29 @@
 						anchor_y: 'bottom'
 		    			adaptive_width: True
 
-						MDRectangleFlatButton:
-						    text: "Download all"
-						    text_color: get_color_from_hex("#718089")
-	    					line_color: get_color_from_hex("#8fce00")
-	    					on_release: app.custom_dispatcher.do_download_all()
+						ToolbarItemWidget:
+							padding: 6, 0
+							size_hint: None, None
+							size: 112, 33
+							hover: False
+							action: app.custom_dispatcher.do_download_all
+							md_bg_color: get_color_from_hex("#FF5656")
+
+							MDIcon:
+								size_hint: None, None
+								size: 30, 33
+								icon: 'cloud-download'
+								theme_text_color: "Custom"
+			    				text_color: get_color_from_hex("#ffffff")
+			    				halign: 'center'
+
+			    			MDLabel:
+			    				padding_x: 5, 0
+			    				bold: True
+			    				text: 'DOWNLOAD'
+			    				font_size: '12px'
+			    				theme_text_color: "Custom"
+			    				text_color: get_color_from_hex("#ffffff")
 
 			ScreenManager:
 				id: content_manager
@@ -136,99 +390,78 @@
 
 <SkinWidget>:
 	md_bg_color: get_color_from_hex("#333333")
-	padding: "5dp"
+	padding: 0
 	spacing: ["15dp", 0]
 	cols: 4
     orientation: "tb-lr"
     size_hint_y: None
     height: 50
 
-	DescriptionLabelWidget:
-		size_hint_x: 0.25
-		id: "desc_text"
-        text: ""
-        valign: "center"
-        markup: True
-        color: get_color_from_hex("#718089")
-
-    PercentageLabelWidget:
-    	size_hint_x: 0.05
-    	id: "percentage_text"
-        text: "0%"
-        halign: "center"
-        valign: "center"
-        color: get_color_from_hex("#718089")
-
-    ProgressBarWidget:
-    	size_hint_x: 0.2
-    	id: "progress_bar"
-    	padding: "10dp"
-        value: 0
-        color: get_color_from_hex("#ff8000")
-
-	DownloadWidget:
-		size_hint: None, None
-		id: "download_button"
-	    text: "Download"
-	    text_color: get_color_from_hex("#718089")
-	    line_color: get_color_from_hex("#ff8000")
-
-<BackupScreen>:
-	name: "backup"
 	MDBoxLayout:
-		orientation: "vertical"
-		md_bg_color: get_color_from_hex("#ffffff")
-		padding: ("10dp", "30dp")
-		spacing: "20dp"
+		padding: 0
+		orientation: "horizontal"
 
-		MDLabel:
-    		halign: "center"
-    		id: backup_label
-    		text: "ACC Cars and Liveries Backup:"
-    		theme_text_color: "Custom"
-		    text_color: get_color_from_hex("#333333")
+		MDBoxLayout:
+			name: "league_color_bar"
+			size_hint_x: None
+			width: 10
+			padding_x: 5, 5
 
-		GridLayout:
-			cols: 3
-			padding: "30dp"
-			spacing: "25dp"
-			
-			AnchorLayout:
-				anchor_x: 'right'
-				anchor_y: 'top'
+		DescriptionLabelWidget:
+			size_hint_x: 0.25
+			id: "desc_text"
+	        valign: "center"
+	        markup: True
 
-				MDRectangleFlatButton:
-				    text: "Create backup"
-				    text_color: get_color_from_hex("333333")
-				    line_color: get_color_from_hex("333333")
-				    on_release: root.create_backup()
+		MDBoxLayout:
+			name: "progress_bar_box"
+			id: "progress_bar_box"
+			orientation: "vertical"
+			size_hint_x: None
+			width: 177
+			padding: 10
 
-			AnchorLayout:
-				anchor_x: 'center'
-				anchor_y: 'top'
+		    PercentageLabelWidget:
+		    	padding: (0, 0)
+		    	height: 25
+		    	markup: True
+		    	font_size: "14px"
+		    	theme_text_color: "Custom"
+		    	id: "percentage_text"
+		        halign: "center"
+		        valign: "center"
+		        color: get_color_from_hex("#FFFFFF")
 
-				MDRectangleFlatButton:
-				    text: "Restore backup"
-				    text_color: get_color_from_hex("333333")
-				    line_color: get_color_from_hex("333333")
-				    on_release: root.restore_backup()
+		    ProgressBarWidget:
+		    	padding: (0, 0, 0, 0)
+		    	id: "progress_bar"
+		        value: 0
+		        theme_text_color: "Custom"
+		        color: get_color_from_hex("#00cc00")
+		        size_hint_x: None
+		        width: 150
 
-			AnchorLayout:
-				anchor_x: 'left'
-				anchor_y: 'top'
+		MDBoxLayout:
+			name: "download_box"
+			width: 100
+			size_hint_x: None
+			padding: 15, 8
 
-				MDRectangleFlatButton:
-				    text: "Clean customs"
-				    text_color: get_color_from_hex("333333")
-				    line_color: get_color_from_hex("333333")
-				    on_release: root.clean_customs()
+			DownloadWidget:
+				id: "download_button"
+				name: "download_button"
+				md_bg_color_disabled: get_color_from_hex("#333333")
+			    text_color: get_color_from_hex("#FF5656")
+			    line_color: get_color_from_hex("#333333")
+			    theme_text_color: "Custom"
+			    theme_icon_color: "Custom"
+	    		icon_color: get_color_from_hex("#FF5656")
+			    markup: True
+			    font_size: "12px"
 
-		AnchorLayout:
-			anchor_x: 'center'
-			anchor_y: 'top'
-
-			MDRectangleFlatButton:
-			    text: "Exit"
-			    text_color: get_color_from_hex("333333")
-			    line_color: get_color_from_hex("333333")
-			    on_release: root.manager.current = 'content'
+<LeagueButtonWidget>:
+	group: "league"
+	line_width: 2
+	markup: True
+	font_size: "12px"
+	padding: 0

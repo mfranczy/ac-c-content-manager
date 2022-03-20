@@ -12,6 +12,7 @@ class CustomDispatcher(EventDispatcher):
         self.register_event_type('on_recreate_all')
         self.register_event_type('on_download_all')
         self.register_event_type('on_activate_league')
+        self.register_event_type('on_open_backup')
 
     def do_initialize(self, *args):
         self.dispatch('on_initialize')
@@ -27,6 +28,9 @@ class CustomDispatcher(EventDispatcher):
 
     def do_activate_league(self, *args):
         self.dispatch('on_activate_league')
+
+    def do_open_backup(self, *args):
+        self.dispatch('on_open_backup')
 
     def on_initialize(self):
         # add debug log here
@@ -45,5 +49,9 @@ class CustomDispatcher(EventDispatcher):
         pass
 
     def on_activate_league(self):
+        # add debug log here
+        pass
+
+    def on_open_backup(self):
         # add debug log here
         pass

@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from kivymd.app import MDApp
+from json.decoder import JSONDecodeError
 
 
 def cet_timestamp(ts):
@@ -48,7 +49,10 @@ class HTTPClient:
     def list_skins(self):
         endpoint = self.server + "/api/skins/list"
         resp = requests.get(endpoint, auth=HTTPBasicAuth(self.user, self.password))
-        return resp.json()
+        try:
+            return resp.json()
+        except JSONDecodeError:
+            return []
 
     @_refresh_config
     def download_file(self, endpoint, file, progress_callback):

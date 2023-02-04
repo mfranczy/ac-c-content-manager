@@ -1,6 +1,88 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 
+				
+<ZipSkinScreen>:
+	name: "zip_skin"
+	MDBoxLayout:
+    	orientation: "vertical"
+    	md_bg_color: get_color_from_hex("333333")
+    	padding: ("300dp", "100dp")
+    	spacing: "50dp"
+    	
+    	MDLabel:
+    		halign: "center"
+    		id: zip_skin_label
+    		text: "Create a zip file of your skin"
+    		theme_text_color: "Custom"
+		    text_color: get_color_from_hex("FF5656")
+		    height: "30dp"
+    	
+    	
+    	MDBoxLayout:
+    		spacing: "25dp"
+
+			MDTextField:
+				id: car_source
+			    hint_text: "Car source path"
+			    required: True
+			    theme_text_color: "Custom"
+			    text_color: get_color_from_hex("FF5656")
+			    current_line_color: get_color_from_hex("FF5656")
+			    line_color_focus: get_color_from_hex("FF5656")
+			    line_color_normal: get_color_from_hex("FF5656")
+			    error_color: get_color_from_hex("FF5656")
+			    current_hint_text_color: get_color_from_hex("FF5656")
+			    selection_color: get_color_from_hex("FF5656")
+
+			MDRoundFlatIconButton:
+	            text: "Browse"
+	            icon: "folder"
+	            pos_hint: {"center_x": .5, "center_y": .3}
+	            on_release: root.file_manager_open('car_source')
+	            text_color: get_color_from_hex("FF5656")
+			    line_color: get_color_from_hex("FF5656")
+			    icon_color: get_color_from_hex("FF5656")
+			    
+		MDBoxLayout:
+			spacing: "25dp"
+
+			MDTextField:
+				id: zip_destination
+			    hint_text: "Zip target path"
+			    required: True
+			    theme_text_color: "Custom"
+			    text_color: get_color_from_hex("FF5656")
+			    line_color_focus: get_color_from_hex("FF5656")
+			    line_color_normal: get_color_from_hex("FF5656")
+			    error_color: get_color_from_hex("FF5656")
+			    current_hint_text_color: get_color_from_hex("FF5656")
+			    fill_color: get_color_from_hex("FF5656")
+
+			MDRoundFlatIconButton:
+	            text: "Browse"
+	            icon: "folder"
+	            pos_hint: {"center_x": .5, "center_y": .3}
+	            on_release: root.file_manager_open('car_destination')
+	            theme_text_color: "Custom"
+			    text_color: get_color_from_hex("FF5656")
+			    line_color: get_color_from_hex("FF5656")
+			    icon_color: get_color_from_hex("FF5656")
+
+
+		MDBoxLayout:
+			spacing: "470dp"
+			MDRectangleFlatButton:
+			    text: "Cancel"
+			    text_color: get_color_from_hex("FF5656")
+			    line_color: get_color_from_hex("FF5656")
+			    on_release: root.manager.current = 'content'
+			MDRectangleFlatButton:
+			    text: "Create"
+			    text_color: get_color_from_hex("FF5656")
+			    line_color: get_color_from_hex("FF5656")
+			    on_release: root.create()
+
 <BackupScreen>:
 	name: "backup"
 	MDBoxLayout:
@@ -157,13 +239,8 @@
 
 				MDBoxLayout:
 					size_hint: None, None
-					size: 100, 33
+					size: 350, 33
 					padding: 5, 0
-	    		
-	    		MDBoxLayout:
-	    			padding: 5, 0
-	    			size_hint: None, None
-					size: 130, 33
 
 				ToolbarItemWidget:
 					padding: 5, 0
@@ -249,6 +326,26 @@
 			MDBoxLayout:
 				spacing: 10
 				padding: 35, 15
+				
+				ToolbarItemWidget:
+	    			padding: 5, 0
+	    			size_hint: None, None
+					size: 100, 33
+					action: app.custom_dispatcher.do_open_zip_skin
+
+					MDIcon:
+						size_hint: None, None
+						size: 30, 33
+						icon: 'car-hatchback'
+						theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
+
+	    			MDLabel:
+	    				bold: True
+	    				text: 'ZIP SKIN'
+	    				font_size: '12px'
+	    				theme_text_color: "Custom"
+	    				text_color: get_color_from_hex("#FF5656")
 
 				ToolbarItemWidget:
 					size_hint: None, None

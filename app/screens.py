@@ -1,12 +1,17 @@
 import os
 import shutil
+import json
+
+from pathlib import Path
 
 from functools import partial
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
+from kivymd.uix.filemanager import MDFileManager
+from kivymd.toast import toast
 from kivymd.app import MDApp
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, FadeTransition,\
@@ -39,12 +44,14 @@ class MainScreen(ScreenManager):
         self.content = ContentScreen(name='content')
         self.backup = BackupScreen(name='backup')
         self.backup.create_backup(skip_dialog=True)
+        self.zip_skin = ZipSkinScreen(name='zip_skin')
 
         self.app.custom_dispatcher.bind(on_initialize=self.content.on_initialize)
 
         self.add_widget(self.loader)
         self.add_widget(self.content)
         self.add_widget(self.backup)
+        self.add_widget(self.zip_skin)
 
 
 class LoaderScreen(MDScreen):
@@ -339,3 +346,110 @@ class SkinScreen(MDScreen):
         self.id = str(id_)
         self.name = str(id_)
         super(SkinScreen, self).__init__(*args, **kwargs)
+
+
+class ZipSkinScreen(MDScreen):
+
+    def __init__(self, *args, **kwargs):
+        super(ZipSkinScreen, self).__init__(*args, **kwargs)
+        self.app = MDApp.get_running_app()
+        self.app.custom_dispatcher.bind(on_open_zip_skin=self.switch_screen)
+        self.car_source = self.ids.get('car_source')
+        self.zip_destination = self.ids.get('zip_destination')
+        self.zip_destination.text = "{}\Desktop".format(Path.home())
+        self.manager_open = False
+        self.file_manager = MDFileManager(
+            exit_manager=self.exit_manager, select_path=self.select_path
+        )
+        self.game_dir = self.app.config.get("acc", "skins_dir")
+        
+    def file_manager_open(self, managerType):
+        self.managerType = managerType
+        path = "{}\Customs\Cars".format(self.game_dir)
+        if managerType == "car_destination":
+            path = "{}\Desktop".format(Path.home())
+        self.file_manager.show(os.path.expanduser(path))
+        self.manager_open = True
+    
+    def exit_manager(self, *args):
+        self.manager_open = False
+        self.file_manager.close()
+
+    def select_path(self, path: str):
+        self.exit_manager()
+        if self.managerType == 'car_destination':
+            if not os.path.isdir(path):
+                self.zip_destination.text = ""
+                Snackbar(
+                    text="[color=#f2776d]ERROR: Zip target path must be a directory![/color]",
+                    size_hint_x=1,
+                    snackbar_y="30dp",
+                    snackbar_x="30dp",
+                    bg_color=get_color_from_hex("#544746")
+                ).open()
+            else:
+                self.zip_destination.text = path
+        else:
+            if not os.path.isfile(path):
+                self.car_source.text = ""
+                Snackbar(
+                    text="[color=#f2776d]ERROR: The car source path must be a file![/color]",
+                    size_hint_x=1,
+                    snackbar_y="30dp",
+                    snackbar_x="30dp",
+                    bg_color=get_color_from_hex("#544746")
+                ).open()
+            else:
+                self.car_source.text = path
+
+    def switch_screen(self, *args):
+        if self.manager.current != self.name:
+            self.manager.current = self.name
+
+    def create(self, *args, **kwargs):
+        oldwd = os.getcwd()
+        if self.zip_destination.text == "" or self.car_source.text == "":
+            Snackbar(
+                text="[color=#f2776d]ERROR: The car source path and zip target path fields must be set![/color]",
+                size_hint_x=1,
+                snackbar_y="30dp",
+                snackbar_x="30dp",
+                bg_color=get_color_from_hex("#544746")
+            ).open()
+            return
+
+        try:
+            os.chdir(self.game_dir)
+            skin_path = self.car_source.text
+            is_file = os.path.isfile(skin_path)
+            if not is_file:
+                raise Exception("Invalid car.json path")
+
+            with open(skin_path, 'rb') as f:
+                content = f.read().decode('utf-16')
+
+            data = json.loads(content)            
+            skin_name = data['customSkinName']
+
+            with ZipFile('{}\{}.zip'.format(self.zip_destination.text, skin_name), 'w', compression=ZIP_DEFLATED) as z:
+                z.write(skin_path)
+                
+                for root, _, files in os.walk('Customs\Liveries\{}'.format(skin_name)):
+                    for f in files:
+                        if f.endswith('_0.dds'):
+                            continue
+                        p = os.path.join(root, f)
+                        z.write(p)
+
+        except Exception as exc:
+            Snackbar(
+                text="[color=#f2776d]ERROR: {}[/color]".format(exc),
+                size_hint_x=1,
+                snackbar_y="30dp",
+                snackbar_x="30dp",
+                bg_color=get_color_from_hex("#544746")
+            ).open()
+        else:
+            toast("Zip has been created at {}\{}.zip".format(self.zip_destination.text, skin_name))
+        finally:
+            os.chdir(oldwd)

@@ -17,7 +17,7 @@ class ThreadPool(metaclass=Singleton):
 
     def __init__(self, **kwargs):
         self.q = queue.Queue()
-        self.workers_num = 5
+        self.workers_num = 3
         self.workers = []
         for _ in range(self.workers_num):
             self.workers.append(

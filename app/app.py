@@ -7,7 +7,7 @@ from pathlib import Path
 os.environ['KIVY_HOME'] = r'{}\Documents\Simrace Content Manager'.format(Path.home())
 
 from kivy.config import Config
-Config.set('graphics', 'width', '1024')
+Config.set('graphics', 'width', '1250')
 Config.set('graphics', 'height', '768')
 
 from kivymd.app import MDApp
@@ -69,6 +69,6 @@ class App(MDApp):
         return SettingsScreen()
 
     def build(self):
-        self.title = "simrace.pl - build v0.1.0"
+        self.title = "simrace.pl - build v0.1.1"
         self.icon = "icon.ico"
         return MainScreen()

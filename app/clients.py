@@ -4,6 +4,7 @@ import tempfile
 import zipfile
 import requests
 import time
+import io
 
 from datetime import datetime
 from pytz import timezone
@@ -62,7 +63,7 @@ class HTTPClient:
             if resp.status_code != 200:
                 raise Exception("Unable to download file, response code {}".format(resp.status_code))
             max_size = int(resp.headers.get('Content-Length', 0))
-            for chunk in resp.iter_content(chunk_size=512):
+            for chunk in resp.iter_content(chunk_size=65536):
                 fd.write(chunk)
                 progress_callback(max_size, len(chunk))
 
@@ -129,7 +130,6 @@ class LocalFileClient:
         return self.temp
 
     def delete_temp(self):
-        return
         if self.temp is not None:
             shutil.rmtree(self.temp.name, ignore_errors=True)
 

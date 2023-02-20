@@ -419,7 +419,7 @@ class ZipSkinScreen(MDScreen):
             return
 
         try:
-            os.chdir(self.game_dir)
+            os.chdir(os.path.dirname(self.car_source.text))
             skin_path = self.car_source.text
             is_file = os.path.isfile(skin_path)
             if not is_file:
@@ -432,14 +432,16 @@ class ZipSkinScreen(MDScreen):
             skin_name = data['customSkinName']
 
             with ZipFile('{}\{}.zip'.format(self.zip_destination.text, skin_name), 'w', compression=ZIP_DEFLATED) as z:
-                z.write(skin_path)
-                
-                for root, _, files in os.walk('Customs\Liveries\{}'.format(skin_name)):
+                z.write(skin_path, 'Customs\Cars\{}'.format(os.path.basename(skin_path)))
+
+                os.chdir('..\Liveries')
+
+                for root, _, files in os.walk(skin_name):
                     for f in files:
                         if f.endswith('_0.dds'):
                             continue
                         p = os.path.join(root, f)
-                        z.write(p)
+                        z.write(p, 'Customs\Liveries\{}'.format(p))
 
         except Exception as exc:
             Snackbar(

@@ -22,66 +22,92 @@
     	MDBoxLayout:
     		spacing: "25dp"
 
-			MDTextField:
-				id: car_source
-			    hint_text: "Car source path"
-			    required: True
-			    theme_text_color: "Custom"
-			    text_color: get_color_from_hex("FF5656")
-			    current_line_color: get_color_from_hex("FF5656")
-			    line_color_focus: get_color_from_hex("FF5656")
-			    line_color_normal: get_color_from_hex("FF5656")
-			    error_color: get_color_from_hex("FF5656")
-			    current_hint_text_color: get_color_from_hex("FF5656")
-			    selection_color: get_color_from_hex("FF5656")
+			MDBoxLayout:
+                orientation: "vertical"
+				    		
+				MDTextField:
+					id: car_source
+				    hint_text: "Car json path"
+				    theme_text_color: "Custom"
+				    line_color_focus: get_color_from_hex("FF5656")
+				    line_color_normal: get_color_from_hex("FF5656")
+				    error_color: get_color_from_hex("FFFFFF")
+				    current_hint_text_color: get_color_from_hex("FF5656")
+				    line_anim: False
 
-			MDRoundFlatIconButton:
+				MDLabel:
+		    		halign: "left"
+		    		text: 'This field is required. You can edit and paste the directory here or click "browse".'
+		    		theme_text_color: "Custom"
+				    text_color: get_color_from_hex("FFFFFF")
+				    size_hint_y: None
+				    height: "10dp"
+				    font_size: "12sp"
+	
+			MDFillRoundFlatIconButton:
 	            text: "Browse"
 	            icon: "folder"
 	            pos_hint: {"center_x": .5, "center_y": .3}
 	            on_release: root.file_manager_open('car_source')
-	            text_color: get_color_from_hex("FF5656")
-			    line_color: get_color_from_hex("FF5656")
-			    icon_color: get_color_from_hex("FF5656")
-			    
+	            text_color: get_color_from_hex("FFFFFF")
+			    icon_color: get_color_from_hex("FFFFFF")
+			    md_bg_color: get_color_from_hex("FF5656")
+
 		MDBoxLayout:
 			spacing: "25dp"
+			
+			MDBoxLayout:
+                orientation: "vertical"
+				    		
+				MDTextField:
+					id: zip_destination
+				    hint_text: "Zip target path"
+				    theme_text_color: "Custom"
+				    line_color_focus: get_color_from_hex("FF5656")
+				    line_color_normal: get_color_from_hex("FF5656")
+				    error_color: get_color_from_hex("FFFFFF")
+				    current_hint_text_color: get_color_from_hex("FF5656")
+				    line_anim: False
 
-			MDTextField:
-				id: zip_destination
-			    hint_text: "Zip target path"
-			    required: True
-			    theme_text_color: "Custom"
-			    text_color: get_color_from_hex("FF5656")
-			    line_color_focus: get_color_from_hex("FF5656")
-			    line_color_normal: get_color_from_hex("FF5656")
-			    error_color: get_color_from_hex("FF5656")
-			    current_hint_text_color: get_color_from_hex("FF5656")
-			    fill_color: get_color_from_hex("FF5656")
+				MDLabel:
+		    		halign: "left"
+		    		text: 'This field is required. You can edit and paste the directory here or click "browse".'
+		    		theme_text_color: "Custom"
+				    text_color: get_color_from_hex("FFFFFF")
+				    size_hint_y: None
+				    height: "10dp"
+				    font_size: "12sp"
 
-			MDRoundFlatIconButton:
+			MDFillRoundFlatIconButton:
 	            text: "Browse"
 	            icon: "folder"
 	            pos_hint: {"center_x": .5, "center_y": .3}
 	            on_release: root.file_manager_open('car_destination')
 	            theme_text_color: "Custom"
-			    text_color: get_color_from_hex("FF5656")
-			    line_color: get_color_from_hex("FF5656")
-			    icon_color: get_color_from_hex("FF5656")
-
+			    text_color: get_color_from_hex("FFFFFF")
+			    icon_color: get_color_from_hex("FFFFFF")
+			    md_bg_color: get_color_from_hex("FF5656")
+			    round: 0,0,0,0
 
 		MDBoxLayout:
-			spacing: "470dp"
-			MDRectangleFlatButton:
-			    text: "Cancel"
-			    text_color: get_color_from_hex("FF5656")
-			    line_color: get_color_from_hex("FF5656")
-			    on_release: root.manager.current = 'content'
-			MDRectangleFlatButton:
-			    text: "Create"
-			    text_color: get_color_from_hex("FF5656")
-			    line_color: get_color_from_hex("FF5656")
-			    on_release: root.create()
+			
+			AnchorLayout:
+				anchor_x: "center"
+
+				MDRectangleFlatButton:
+				    text: "Cancel"
+				    text_color: get_color_from_hex("FF5656")
+				    line_color: get_color_from_hex("FF5656")
+				    on_release: root.manager.current = 'content'
+				    
+			AnchorLayout:
+				anchor_x: "center"
+
+				MDRectangleFlatButton:
+				    text: "Create"
+				    text_color: get_color_from_hex("FF5656")
+				    line_color: get_color_from_hex("FF5656")
+				    on_release: root.create()
 
 <BackupScreen>:
 	name: "backup"

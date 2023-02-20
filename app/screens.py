@@ -433,8 +433,11 @@ class ZipSkinScreen(MDScreen):
 
             with ZipFile('{}\{}.zip'.format(self.zip_destination.text, skin_name), 'w', compression=ZIP_DEFLATED) as z:
                 z.write(skin_path, 'Customs\Cars\{}'.format(os.path.basename(skin_path)))
-
-                os.chdir('..\Liveries')
+                
+                if os.path.exists('Liveries'):
+                    os.chdir('Liveries')
+                else:
+                    os.chdir('..\Liveries')
 
                 for root, _, files in os.walk(skin_name):
                     for f in files:
